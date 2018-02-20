@@ -106,20 +106,35 @@ namespace AGMGSKv9 {
       int vertexHeight;
       int i = 0;
 
-
+      //Color array for height values
+      Color[] ColorMap =
+      {
+        new Color( 143/255f, 93/255f, 72/255f ),
+        new Color( 172/255f, 128/255f, 84/255f ),
+        new Color( 199/255f, 159/255f, 120/255f),
+        new Color( 241/255f, 218/255f, 200/255f ),
+        new Color( 1f, 1f, 1f )
+      };
+      
+      //Creat RNG
       Random rand = new Random();
+      //Initialize 2x2 array for height map generation
       float[,] Heights = new float[2, 2];
       for (int h = 0; h < 2; h++)
         for (int w = 0; w < 2; w++)
           Heights[w,h] = rand.Next(0, 255);
-      float NoiseStrength = 0.6f;
+      //Strength of noise applied
+      float NoiseStrength = 0.75f;
 
-
+      // Double array size and interpolate than apply noise
       for ( int o = 0; o < 8; o++ )
       {
         Heights = DoubleArray(Heights);
         ApplyNoise(Heights, (float)Math.Pow( NoiseStrength,o ), rand);
       }
+
+      //Gaussian blur height values
+      Heights = ApplyGaussian(Heights);
 
 
 
@@ -127,13 +142,12 @@ namespace AGMGSKv9 {
       for (int z = 0; z < height; z++)
         for (int x = 0; x < width; x++)
         {
-          vector4 = heightMap[i].ToVector4();       // convert packed Rgba32 values to floats
-          vertexHeight = (int)(Heights[x,z]);   // scale vertexHeight 0..255
-          vertexHeight *= multiplier;               // multiply height
+          vertexHeight = (int)(Heights[x,z]);   // Set vertex height to value generated in array
+          vertexHeight *= multiplier;               // Scale height
           terrainHeight[x, z] = vertexHeight;       // save height for navigation
           vertex[i] = new VertexPositionColor(
-             new Vector3(x * spacing, vertexHeight, z * spacing),
-             new Color(0, Heights[x, z]/255f, 0, 1f)
+             new Vector3(x * spacing, vertexHeight, z * spacing), // Set vertex values
+             MapColor(ColorMap, Heights[x, z], rand ) // Generate color depending on height
              );
           i++;
         }
@@ -226,6 +240,7 @@ namespace AGMGSKv9 {
       }
     }
 
+    // Print 2D array for debugging
     public void PrintArray(float[,] arr)
     {
       double count = Math.Sqrt(arr.Length);
@@ -240,6 +255,7 @@ namespace AGMGSKv9 {
       Debug.Write("\n");
     }
 
+    // Modify values within 2D array with noise of specified strength multiplier
     public void ApplyNoise( float[,] arr, float Strength, Random rand)
     {
       double count = Math.Sqrt(arr.Length);
@@ -247,11 +263,15 @@ namespace AGMGSKv9 {
       {
         for (int w = 0; w < count; w++)
         {
-          arr[w,h] = Math.Min(Math.Max(arr[w,h] + (rand.Next(0, 255) - 128f) * Strength, 0), 255.0f);
+          float tempStrength = Strength;
+          // Bottom right corner strength reduced for smoother terrain
+          if (w > count / 2 && h > count / 2) tempStrength *= 0.5f * rand.Next(0, 255) / 256;
+          arr[w,h] = Math.Min(Math.Max(arr[w,h] + (rand.Next(0, 255) - 128f) * tempStrength, 0), 255.0f);
         }
       }
     }
 
+    //Double size of array (4x more members) and interpolate values for between
     public float[,] DoubleArray(float[,] arr )
     {
       double count = Math.Sqrt(arr.Length);
@@ -283,5 +303,48 @@ namespace AGMGSKv9 {
 
       return newArr;
     }
+
+    //Apply gaussian blur on 2d array of values
+    public float[,] ApplyGaussian(float[,] arr)
+    {
+      //Kernel calculated from http://dev.theomader.com/gaussian-kernel-calculator/ with sigma of 1.0 and size of 5
+      double count = Math.Sqrt(arr.Length);
+      //Horizontal Pass
+      for (int h = 0; h < count; h++)
+      {
+        for (int w = 0; w < count; w++)
+        {
+          //mix values using generated kernel
+          arr[w, h] = (float)(0.06136f * arr[(int)Math.Max(0, w - 2), h] + 0.24477f * arr[(int)Math.Max(0, w - 1), h] + 0.38774 * arr[w, h] + 0.24477f * arr[(int)Math.Min(count-1, w + 1), h] + 0.06136f * arr[(int)Math.Min(count-1, w + 2), h]);
+        }
+      }
+      //Vertical Pass
+      for (int h = 0; h < count; h++)
+      {
+        for (int w = 0; w < count; w++)
+        {
+          //mix values using generated kernel
+          arr[w, h] = (float)(0.06136f * arr[w, (int)Math.Max(0, h - 2)] + 0.24477f * arr[w, (int)Math.Max(0, h - 1)] + 0.38774 * arr[w, h] + 0.24477f * arr[w, (int)Math.Min(count - 1, h + 1)] + 0.06136f * arr[w, (int)Math.Min(count - 1, h + 2)]);
+        }
+      }
+
+      return arr;
+    }
+
+    // Generate color based on height of vertex with random noise added
+    public Color MapColor( Color[] colorMap, float vertexHeight, Random rand )
+    {
+      int strength = 16; // strength of noise out of 256
+      float discretion = 256 / (colorMap.Length - 1); // range of values that would have similar height color, used to determine base colormap index
+      Vector4 lowcolor = colorMap[(int)Math.Min((int)(vertexHeight / discretion), colorMap.Length - 1)].ToVector4(); // get lower color from color map
+      Vector4 highcolor = colorMap[(int)Math.Min((int)(vertexHeight / discretion) + 1,colorMap.Length-1)].ToVector4(); // get higher color from color map
+      float highweight = (vertexHeight - (int)(vertexHeight / discretion) * discretion) / discretion; // calculate weight if higher color
+      Vector4 mix =  (1 - highweight * highweight * highweight) * lowcolor + (highweight*highweight * highweight) * highcolor; // mix colors together
+       float vnoise = rand.Next(-strength, strength)/256f; // generate noise
+
+      return new Color(mix.X+vnoise, mix.Y+vnoise, mix.Z+vnoise, 1f); //apply noise and return
+
+    }
+
   }
 }
