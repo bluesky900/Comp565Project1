@@ -26,61 +26,109 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using AGMGSKv6;
 #endregion
 
-namespace AGMGSKv9 {
+namespace AGMGSKv9
+{
 
-/// <summary>
-/// Represents the user / player interacting with the stage. 
-/// The Update(Gametime) handles both user keyboard and gamepad controller input.
-/// If there is a gamepad attached the keyboard inputs are not processed.
-/// 
-/// removed game controller code from Update()
-/// 
-/// 2/8/2014 last changed
-/// </summary>
+    /// <summary>
+    /// Represents the user / player interacting with the stage. 
+    /// The Update(Gametime) handles both user keyboard and gamepad controller input.
+    /// If there is a gamepad attached the keyboard inputs are not processed.
+    /// 
+    /// removed game controller code from Update()
+    /// 
+    /// 2/8/2014 last changed
+    /// </summary>
 
-public class Player : Agent {
-   private KeyboardState oldKeyboardState;  
-   private int rotate;
-   private float angle;
-   private Matrix initialOrientation;
+    public class Player : Agent
+    {
+        private KeyboardState oldKeyboardState;
+        private int rotate;
+        private float angle;
+        private Matrix initialOrientation;
 
-   public Player(Stage theStage, string label, Vector3 pos, Vector3 orientAxis, 
-   float radians, string meshFile)
-   : base(theStage, label, pos, orientAxis, radians, meshFile)
-      {  // change names for on-screen display of current camera
-      first.Name =  "First";
-      follow.Name = "Follow";
-      above.Name =  "Above";
-      IsCollidable = true;  // players test collision with Collidable set.
-      stage.Collidable.Add(agentObject);  // player's agentObject can be collided with by others.
-      rotate = 0;
-      angle = 0.01f;
-      initialOrientation = agentObject.Orientation;
-      }
+        private TreasureList treasreList;
+        private int treasureCount;
 
-   /// <summary>
-   /// Handle player input that affects the player.
-   /// See Stage.Update(...) for handling user input that affects
-   /// how the stage is rendered.
-   /// First check if gamepad is connected, if true use gamepad
-   /// otherwise assume and use keyboard.
-   /// </summary>
-   /// <param name="gameTime"></param>
-   public override void Update(GameTime gameTime) {
-      KeyboardState keyboardState = Keyboard.GetState();
-      if (keyboardState.IsKeyDown(Keys.R) && !oldKeyboardState.IsKeyDown(Keys.R)) 
-         agentObject.Orientation = initialOrientation; 
-      // allow more than one keyboardState to be pressed
-      if (keyboardState.IsKeyDown(Keys.Up)) agentObject.Step++;
-      if (keyboardState.IsKeyDown(Keys.Down)) agentObject.Step--; 
-      if (keyboardState.IsKeyDown(Keys.Left)) rotate++;
-      if (keyboardState.IsKeyDown(Keys.Right)) rotate--;
-      oldKeyboardState = keyboardState;    // Update saved state.
-      agentObject.Yaw = rotate * angle;
-      base.Update(gameTime);
-      rotate = agentObject.Step = 0;
-      }
-   }
+        public int treasure_count
+        {
+            get { return this.treasureCount; }
+            set { this.treasureCount = value; }
+        }
+
+        public Player(Stage theStage, string label, Vector3 pos, Vector3 orientAxis,
+        float radians, TreasureList tl, string meshFile)
+        : base(theStage, label, pos, orientAxis, radians, meshFile)
+        {  // change names for on-screen display of current camera
+            first.Name = "First";
+            follow.Name = "Follow";
+            above.Name = "Above";
+            IsCollidable = true;  // players test collision with Collidable set.
+            stage.Collidable.Add(agentObject);  // player's agentObject can be collided with by others.
+            rotate = 0;
+            angle = 0.01f;
+            initialOrientation = agentObject.Orientation;
+
+            this.treasreList = tl;
+            this.treasureCount = 0;
+        }
+
+        /// <summary>
+        /// Handle player input that affects the player.
+        /// See Stage.Update(...) for handling user input that affects
+        /// how the stage is rendered.
+        /// First check if gamepad is connected, if true use gamepad
+        /// otherwise assume and use keyboard.
+        /// </summary>
+        /// <param name="gameTime"></param>
+        public override void Update(GameTime gameTime)
+        {
+            KeyboardState keyboardState = Keyboard.GetState();
+            if (keyboardState.IsKeyDown(Keys.R) && !oldKeyboardState.IsKeyDown(Keys.R))
+                agentObject.Orientation = initialOrientation;
+            // allow more than one keyboardState to be pressed
+            if (keyboardState.IsKeyDown(Keys.Up)) agentObject.Step++;
+            if (keyboardState.IsKeyDown(Keys.Down)) agentObject.Step--;
+            if (keyboardState.IsKeyDown(Keys.Left)) rotate++;
+            if (keyboardState.IsKeyDown(Keys.Right)) rotate--;
+            oldKeyboardState = keyboardState;    // Update saved state.
+            agentObject.Yaw = rotate * angle;
+            base.Update(gameTime);
+            rotate = agentObject.Step = 0;
+
+            //Treasure Collision: Have we come within 300 pixels of an untagged treasure?
+            int thisPosX = (int)this.instance[0].Translation.X;
+            int thisPosZ = (int)this.instance[0].Translation.Z;
+            float distance;
+
+            for (int i = 0; i < treasreList.Instance.Count; i++)
+            {
+                int x, z;
+
+                //Is this treasure tagged?
+                if (this.treasreList.getTreasureNode[i].isTagged)
+                {
+                    continue;
+                }
+
+                //Else
+                //Load in the position of the treasure
+                x = (int)this.treasreList.getTreasureNode[i].x * this.stage.Terrain.Spacing;
+                z = (int)this.treasreList.getTreasureNode[i].z * this.stage.Terrain.Spacing;
+
+                //Are we within 300 pixels of the treasure?
+                distance = Vector2.Distance(new Vector2(x, z), new Vector2(thisPosX, thisPosZ));
+
+                if (distance < (this.stage.Terrain.Spacing * 2))
+                {
+                    //We are within range! Collect the treasure and set the treasure as tagged.
+                    this.treasureCount += 1;
+                    this.treasreList.getTreasureNode[i].isTagged = true;
+
+                }
+            }
+        }
+    }
 }
