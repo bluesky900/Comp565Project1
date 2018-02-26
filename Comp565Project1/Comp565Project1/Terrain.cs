@@ -315,25 +315,37 @@ namespace AGMGSKv9
     //Apply gaussian blur on 2d array of values
     public float[,] ApplyGaussian(float[,] arr)
     {
-      //Kernel calculated from http://dev.theomader.com/gaussian-kernel-calculator/ with sigma of 1.0 and size of 5
+			float radius = 1.1f; // Actually the Standard Deviation but also the number max number of elements from center we'll sample
       double count = Math.Sqrt(arr.Length);
       //Horizontal Pass
       for (int h = 0; h < count; h++)
       {
         for (int w = 0; w < count; w++)
         {
-          //mix values using generated kernel
-          arr[w, h] = (float)(0.06136f * arr[(int)Math.Max(0, w - 2), h] + 0.24477f * arr[(int)Math.Max(0, w - 1), h] + 0.38774 * arr[w, h] + 0.24477f * arr[(int)Math.Min(count - 1, w + 1), h] + 0.06136f * arr[(int)Math.Min(count - 1, w + 2), h]);
-        }
+					double finalHeight = 0; //Tracker for height of vertex
+					for ( float r = -2f * radius; r <= 2f*radius; r++ ) // Go from radius to radius
+					{
+						int e = (int)Math.Min(Math.Max(0, w + r), count - 1); //Clamp radius so it stays in bounds
+						double weight = (1f / Math.Sqrt(2 * Math.PI * (float)radius * (float)radius)) * Math.Exp(-1f * (r * r) / (2 * radius * radius));// Calculate weight of each element
+						finalHeight += weight * arr[e, h];
+					}
+					arr[w, h] = (float)finalHeight;
+				}
       }
-      //Vertical Pass
+      //Vertical Pass, same as above except y-value changes when sampling
       for (int h = 0; h < count; h++)
       {
         for (int w = 0; w < count; w++)
         {
-          //mix values using generated kernel
-          arr[w, h] = (float)(0.06136f * arr[w, (int)Math.Max(0, h - 2)] + 0.24477f * arr[w, (int)Math.Max(0, h - 1)] + 0.38774 * arr[w, h] + 0.24477f * arr[w, (int)Math.Min(count - 1, h + 1)] + 0.06136f * arr[w, (int)Math.Min(count - 1, h + 2)]);
-        }
+					double finalHeight = 0;
+					for (float r = -2f * radius; r <= 2f * radius; r++)
+					{
+						double weight = (1f / Math.Sqrt(2 * Math.PI * (float)radius * (float)radius)) * Math.Exp(-1 * (r * r) / (2 * radius * radius));
+						int e = (int)Math.Min(Math.Max(0, h + r), count - 1);
+						finalHeight += weight * arr[w, e];
+					}
+					arr[w, h] = (float)finalHeight;
+				}
       }
 
       return arr;
@@ -342,15 +354,15 @@ namespace AGMGSKv9
     // Generate color based on height of vertex with random noise added
     public Color MapColor(Color[] colorMap, float vertexHeight, Random rand)
     {
-      int strength = 16; // strength of noise out of 256
-      int weightPower = 2; // Power of exponent to modify weight
+      int strength = 1; // strength of noise out of 256
+      int weightPower = 1; // Power of exponent to modify weight
       float discretion = maxHeight / (colorMap.Length - 1); // range of values that would have similar height color, used to determine base colormap index
       Vector4 lowcolor = colorMap[(int)Math.Min((int)(vertexHeight / discretion), colorMap.Length - 1)].ToVector4(); // get lower color from color map
       Vector4 highcolor = colorMap[(int)Math.Min((int)(vertexHeight / discretion) + 1, colorMap.Length - 1)].ToVector4(); // get higher color from color map
       float highweight = (vertexHeight - (int)(vertexHeight / discretion) * discretion) / discretion; // calculate weight if higher color
       Vector4 mix = (1 - (float)Math.Pow(highweight, weightPower)) * lowcolor + ((float)Math.Pow(highweight, weightPower)) * highcolor; // mix colors together
-      //float vnoise = rand.Next(-strength, strength)/256f; // generate noise
-      float vnoise = 0;
+      float vnoise = rand.Next(-strength, strength)/256f; // Generate noise
+      //float vnoise = 0;
 
       return new Color(mix.X + vnoise, mix.Y + vnoise, mix.Z + vnoise, 1f); //apply noise and return
 
