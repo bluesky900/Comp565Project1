@@ -23,6 +23,7 @@
 using System;
 using System.IO;  // needed for trace()'s fout
 using System.Collections.Generic;
+using System.Diagnostics; // For Debug
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -56,6 +57,7 @@ namespace AGMGSKv9
         private int treasureCount;
         //Treasure Goal boolean
         private bool treasurePath;
+        public bool lockState = false;
 
         public int treasure_count
         {
@@ -112,6 +114,7 @@ namespace AGMGSKv9
         public override void Update(GameTime gameTime)
         {
             float distance, distance2;
+            KeyboardState keyboardState = Keyboard.GetState(); 
 
             if (this.treasurePath)
             {
@@ -139,8 +142,10 @@ namespace AGMGSKv9
 
                     //Change path back to normal
                     this.treasurePath = false;
-
                 }
+
+                if (keyboardState.IsKeyDown(Keys.N) && !lockState) { this.treasurePath = false; lockState = true; }
+
 
 
             }
@@ -162,9 +167,10 @@ namespace AGMGSKv9
                     nextGoal = path.NextNode;
                     // agentObject.turnToFace(nextGoal.Translation);
                 }
-                KeyboardState keyboardState = Keyboard.GetState();
-                if (keyboardState.IsKeyDown(Keys.N))
+                Debug.WriteLine(this.treasurePath);
+                if (keyboardState.IsKeyDown(Keys.N) && !lockState)
                 {
+                    lockState = true;
                     distance = float.MaxValue;
 
                     //We'll need to find the closest untagged treasure to the agent
@@ -195,10 +201,9 @@ namespace AGMGSKv9
 
                 }
 
-
-
-                base.Update(gameTime);  // Agent's Update();
             }
+            if (keyboardState.IsKeyUp(Keys.N)) lockState = false;
+            base.Update(gameTime);  // Agent's Update();
         }
     }
 }
