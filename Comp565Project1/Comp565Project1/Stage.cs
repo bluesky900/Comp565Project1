@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using AGMGSKv6;
 #endregion
 
 namespace AGMGSKv9 {
@@ -108,8 +109,9 @@ public class Stage : Game {
 	// Stage variables
 	private TimeSpan time;  // if you need to know the time see Property Time
 
+    protected TreasureList treasure;
 
-   public Stage() : base() {
+    public Stage() : base() {
       graphics = new GraphicsDeviceManager(this);
       Content.RootDirectory = "Content";
 	  // next line needed for Monogame 3.6
@@ -431,15 +433,20 @@ public class Stage : Game {
       collidable = new List<Object3D>();  // collection of objects to test for collisions
 		terrain = new Terrain(this, "terrain", "heightTexture", "colorTexture");
       Components.Add(terrain);
+
+      //Add treasure locations and meshes to map (this needs to be done before agent loads)
+      treasure = new TreasureList(this, "TreasureList", "redAvatarV6", false);
+      Components.Add(treasure);
+
       // Load Agent mesh objects, meshes do not have textures
       player = new Player(this, "Chaser",
          new Vector3(510 * spacing, terrain.surfaceHeight(510, 507), 507 * spacing),
-         new Vector3(0, 1, 0), 0.78f, "redAvatarV6");  // face looking diagonally across stage
+         new Vector3(0, 1, 0), 0.78f, treasure, "redAvatarV6");  // face looking diagonally across stage
       player.IsCollidable = true; // test collisions for player
       Components.Add(player);
       npAgent = new NPAgent(this, "Evader",
          new Vector3(490 * spacing, terrain.surfaceHeight(490, 450), 450 * spacing),
-         new Vector3(0, 1, 0), 0.0f, "magentaAvatarV6");  // facing +Z
+         new Vector3(0, 1, 0), 0.0f, treasure, "magentaAvatarV6");  // facing +Z
 		npAgent.IsCollidable = false;  // npAgent does not test for collisions
       Components.Add(npAgent);
 		// create file output stream for trace()
@@ -451,21 +458,16 @@ public class Stage : Game {
 		Components.Add(wall);
 		// create a pack for "flocking" algorithms
 		// create a Pack of 6 dogs centered at (450, 500) that is leaderless
-		Pack pack = new Pack(this, "dog", "dawg", 6, 450, 430, null);
+		Pack pack = new Pack(this, "dog", "dogV6", 6, 450, 430, null);
 		Components.Add(pack);
       // ----------- OPTIONAL CONTENT HERE -----------------------
       // Load content for your project here
       // create a temple
-      Model3D m3d = new Model3D(this, "temple", "Temple");
+      Model3D m3d = new Model3D(this, "temple", "templeV3");
       m3d.IsCollidable = true;  // must be set before addObject(...) and Model3D doesn't set it
       m3d.addObject(new Vector3(340 * spacing, terrain.surfaceHeight(340, 340), 340 * spacing),
          new Vector3(0, 1, 0), 0.79f); // , new Vector3(1, 4, 1));
       Components.Add(m3d);
-
-	  treasure = new TreasureList(this, "TreasureList", "ChestClosed", false);
-      Components.Add(treasure);
-
-
 		// create 20 clouds
 		Cloud cloud = new Cloud(this, "cloud", "cloudV3", 20);
 		// Set initial camera and projection matrix
@@ -522,6 +524,9 @@ public class Stage : Game {
 		setCamera(1);
 		else if (keyboardState.IsKeyDown(Keys.X) && !oldKeyboardState.IsKeyDown(Keys.X))
 		setCamera(-1);
+		else if (keyboardState.IsKeyDown(Keys.N) && !oldKeyboardState.IsKeyDown(Keys.N))
+			NPAgent.treasureSearch = true;
+			
 	
 		// key event handlers needed for Inspector
 		// set help display on
