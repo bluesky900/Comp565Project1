@@ -45,23 +45,22 @@ namespace AGMGSKv6
             this.isCollidable = isCollidable;
 
 
-            //The following represents a list of treausre locations..
-            int[,] treasure = {
-                                  {430,400},
-                                  {410,400},
-                                  {420,400},
-                                  {447,453},
-                              };
+            //The following represents a list of treasure locations..
+			Random random = new Random();
+            int[,] treasure = new int[4,2];
 
             //Create a list of treasures
             this.treasureNode = new TreasureNode[treasure.GetLength(0)];
             int x, z;
 
-            for (int i = 0; i < treasure.GetLength(0); i++)
-            {
-                //Positions
-                x = treasure[i, 0];
-                z = treasure[i, 1];
+            for (int i = 0; i < treasure.GetLength(0); i++){
+				//Positions
+				int x = (96 + random.Next(256)*stage.Spacing);
+                int z = (96 + random.Next(256)*stage.Spacing);
+                if(i == 1) {
+                    x = 67050;
+                    z = 67950;
+                }
 
                 //Keep a list of these locations
                 this.treasureNode[i].x = x;
@@ -69,11 +68,10 @@ namespace AGMGSKv6
                 this.treasureNode[i].isTagged = false;
 
                 //Add the treasure
-                addObject(new Vector3(x * stage.Spacing, stage.Terrain.surfaceHeight(x, z), z * stage.Spacing),
-                          new Vector3(0, 1, 0),
-                          0.0f,
-                          new Vector3(1, 1, 1));
-
+                addObject(new Vector3(x, stage.Terrain.surfaceHeight(x, z), z),
+                          new Vector3(0, 1, 0), 0.0f,
+						  new Vector3(2.5f, 2.5f, 2.5f)
+						  );
             }
 
 

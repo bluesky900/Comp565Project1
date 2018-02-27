@@ -524,35 +524,33 @@ public class Stage : Game {
 			}
 		// Process user keyboard events that relate to the render state of the the stage
 		KeyboardState keyboardState = Keyboard.GetState();
-            if (keyboardState.IsKeyDown(Keys.Escape)) Exit();
-            else if (keyboardState.IsKeyDown(Keys.B) && !oldKeyboardState.IsKeyDown(Keys.B))
-                DrawBoundingSpheres = !DrawBoundingSpheres;
-            else if (keyboardState.IsKeyDown(Keys.C) && !oldKeyboardState.IsKeyDown(Keys.C))
-                setCamera(1);
-            else if (keyboardState.IsKeyDown(Keys.X) && !oldKeyboardState.IsKeyDown(Keys.X))
-                setCamera(-1);
-
-            // key event handlers needed for Inspector
-            // set help display on
-            else if (keyboardState.IsKeyDown(Keys.H) && !oldKeyboardState.IsKeyDown(Keys.H))
-            {
-                inspector.ShowHelp = !inspector.ShowHelp;
-                inspector.ShowMatrices = false;
-            }
-            // set info display on
-            else if (keyboardState.IsKeyDown(Keys.I) && !oldKeyboardState.IsKeyDown(Keys.I))
-                inspector.showInfo();
-            // set miscellaneous display on
-            else if (keyboardState.IsKeyDown(Keys.M) && !oldKeyboardState.IsKeyDown(Keys.M))
-            {
-                inspector.ShowMatrices = !inspector.ShowMatrices;
-                inspector.ShowHelp = false;
-            }
-            // toggle update speed between FixedStep and ! FixedStep
-            else if (keyboardState.IsKeyDown(Keys.T) && !oldKeyboardState.IsKeyDown(Keys.T)) FixedStepRendering = ! FixedStepRendering;
-            // Toggle LERP function on height
-            else if (keyboardState.IsKeyDown(Keys.L) && !oldKeyboardState.IsKeyDown(Keys.L)) { useLerp = !useLerp; }
-            oldKeyboardState = keyboardState;    // Update saved state.
+		if (keyboardState.IsKeyDown(Keys.Escape)) Exit();
+		else if (keyboardState.IsKeyDown(Keys.B) && !oldKeyboardState.IsKeyDown(Keys.B)) 
+		DrawBoundingSpheres = ! DrawBoundingSpheres;
+		else if (keyboardState.IsKeyDown(Keys.C) && !oldKeyboardState.IsKeyDown(Keys.C)) 
+		setCamera(1);
+		else if (keyboardState.IsKeyDown(Keys.X) && !oldKeyboardState.IsKeyDown(Keys.X))
+		setCamera(-1);
+		else if (keyboardState.IsKeyDown(Keys.N) && !oldKeyboardState.IsKeyDown(Keys.N))
+			NPAgent.treasureSearch = true;
+			
+	
+		// key event handlers needed for Inspector
+		// set help display on
+		else if (keyboardState.IsKeyDown(Keys.H) && !oldKeyboardState.IsKeyDown(Keys.H)) {
+			inspector.ShowHelp = ! inspector.ShowHelp; 
+			inspector.ShowMatrices = false; }
+		// set info display on
+		else if (keyboardState.IsKeyDown(Keys.I) && !oldKeyboardState.IsKeyDown(Keys.I)) 
+		inspector.showInfo();
+		// set miscellaneous display on
+		else if (keyboardState.IsKeyDown(Keys.M) && !oldKeyboardState.IsKeyDown(Keys.M)) {
+			inspector.ShowMatrices = ! inspector.ShowMatrices;
+			inspector.ShowHelp = false; }
+		// toggle update speed between FixedStep and ! FixedStep
+		else if (keyboardState.IsKeyDown(Keys.T) && !oldKeyboardState.IsKeyDown(Keys.T))
+		FixedStepRendering = ! FixedStepRendering;
+		oldKeyboardState = keyboardState;    // Update saved state.
 		base.Update(gameTime);  // update all GameComponents and DrawableGameComponents
 		currentCamera.updateViewMatrix();
 
