@@ -167,7 +167,7 @@ namespace AGMGSKv9
                     nextGoal = path.NextNode;
                     // agentObject.turnToFace(nextGoal.Translation);
                 }
-                Debug.WriteLine(this.treasurePath);
+                //Debug.WriteLine(this.treasurePath);
                 if (keyboardState.IsKeyDown(Keys.N) && !lockState)
                 {
                     lockState = true;
