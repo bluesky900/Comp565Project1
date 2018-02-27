@@ -46,12 +46,13 @@ public class Cloud : MovableModel3D {
       random = new Random();
 		// add nClouds random cloud instances
 		for (int i = 0; i < nClouds; i++) {
-			int x = (128 + random.Next(256)) * stage.Spacing;  // 128 .. 384
-			int z = (128 + random.Next(256)) * stage.Spacing;
-			addObject(
-				new Vector3(x , stage.surfaceHeight(x, z)  + 4000, z ),
-				new Vector3(0, 1, 0), (random.Next(5)) * 0.01f,
-				new Vector3(4 + random.Next(3), random.Next(4) + 1, 3 + random.Next(2)));
+			int x = (32 + random.Next(512-32)) * stage.Spacing;  // 128 .. 384
+			int z = (32 + random.Next(512-32)) * stage.Spacing;
+                float scale = 4 + random.Next(3);
+                addObject(
+                    new Vector3(x, stage.surfaceHeight(x, z) + random.Next(8000,10000), z),
+                    new Vector3(0, 1, 0), (random.Next(360)) * 0.0174533f,
+                    new Vector3(scale , scale, scale ));
 				}    
       } 
   
