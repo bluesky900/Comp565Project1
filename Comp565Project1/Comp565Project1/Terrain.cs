@@ -32,85 +32,85 @@ using Microsoft.Xna.Framework.Input;
 namespace AGMGSKv9
 {
 
-  /// <summary>
-  /// Terrain represents a ground.
-  /// The vertices have position and color.  Terrain width = height.  
-  /// Reads two textures to set terrain height and color values.
-  /// You might want to pre-compute and store heights of surfaces to be 
-  /// returned by the surfaceHeight(x, z) method.
-  /// 
-  /// 1/25/2012 last changed
-  /// </summary>
-  /// 
-  public class Terrain : IndexVertexBuffers
-  {
-    protected VertexPositionColor[] vertex;  // stage vertices    
-    private int height = 0, width = 0, multiplier = 20, spacing = 0;
-    private int[,] terrainHeight;
-    private BasicEffect effect;
-    private GraphicsDevice display;
-    private float maxHeight = 512f;
-
-    public Terrain(Stage theStage, string label, string terrainDataFile)
-       : base(theStage, label)
+    /// <summary>
+    /// Terrain represents a ground.
+    /// The vertices have position and color.  Terrain width = height.  
+    /// Reads two textures to set terrain height and color values.
+    /// You might want to pre-compute and store heights of surfaces to be 
+    /// returned by the surfaceHeight(x, z) method.
+    /// 
+    /// 1/25/2012 last changed
+    /// </summary>
+    /// 
+    public class Terrain : IndexVertexBuffers
     {
-      constructorInit();  // common constructor initialization code, base call sets "stage"
-                          // read vertex data from "terrain.dat" file
-      System.IO.TextReader file = System.IO.File.OpenText(terrainDataFile);
-      file.ReadLine(); // skip the first description line x y z r g b
-      int i = 0;   // index for vertex[]
-      string line;
-      string[] token;
+        protected VertexPositionColor[] vertex;  // stage vertices    
+        private int height = 0, width = 0, multiplier = 20, spacing = 0;
+        private int[,] terrainHeight;
+        private BasicEffect effect;
+        private GraphicsDevice display;
+        private float maxHeight = 512f;
 
-
-      for (int z = 0; z < height; z++)
-        for (int x = 0; x < width; x++)
+        public Terrain(Stage theStage, string label, string terrainDataFile)
+           : base(theStage, label)
         {
-          line = file.ReadLine();
-          token = line.Split(' ');
-          terrainHeight[x, z] = int.Parse(token[1]) * multiplier;  // Y
-          vertex[i] = new VertexPositionColor(
-            new Vector3(int.Parse(token[0]) * spacing, terrainHeight[x, z], int.Parse(token[2]) * spacing), // position
-            new Color(int.Parse(token[3]), int.Parse(token[4]), int.Parse(token[5])));  // material
-          i++;
+            constructorInit();  // common constructor initialization code, base call sets "stage"
+                                // read vertex data from "terrain.dat" file
+            System.IO.TextReader file = System.IO.File.OpenText(terrainDataFile);
+            file.ReadLine(); // skip the first description line x y z r g b
+            int i = 0;   // index for vertex[]
+            string line;
+            string[] token;
+
+
+            for (int z = 0; z < height; z++)
+                for (int x = 0; x < width; x++)
+                {
+                    line = file.ReadLine();
+                    token = line.Split(' ');
+                    terrainHeight[x, z] = int.Parse(token[1]) * multiplier;  // Y
+                    vertex[i] = new VertexPositionColor(
+                      new Vector3(int.Parse(token[0]) * spacing, terrainHeight[x, z], int.Parse(token[2]) * spacing), // position
+                      new Color(int.Parse(token[3]), int.Parse(token[4]), int.Parse(token[5])));  // material
+                    i++;
+                }
+
+
+            file.Close();
+            makeIndicesSetData();
         }
 
+        /// <summary>
+        /// Make a Terrain from 2 png texture files.  
+        /// Must have __XNA4__ capabilities to read from png files.
+        /// </summary>
+        /// <param name="theStage"></param>
+        /// <param name="label"></param>
+        /// <param name="heightFile"></param>
+        /// <param name="colorFile"></param>
+        public Terrain(Stage theStage, string label, string heightFile, string colorFile)
+           : base(theStage, label)
+        {
+            Texture2D heightTexture, colorTexture;
+            Microsoft.Xna.Framework.Color[] heightMap, colorMap;
+            constructorInit();  // common constructor initialization code, base call sets "stage"
+            heightTexture = stage.Content.Load<Texture2D>(heightFile);
+            heightMap =
+               new Microsoft.Xna.Framework.Color[width * height];
+            heightTexture.GetData<Microsoft.Xna.Framework.Color>(heightMap);
+            // create colorMap values from colorTexture
+            colorTexture = stage.Content.Load<Texture2D>(colorFile);
+            colorMap =
+               new Microsoft.Xna.Framework.Color[width * height];
+            colorTexture.GetData<Microsoft.Xna.Framework.Color>(colorMap);
+            // create  vertices for terrain
+            Vector4 vector4;
+            int vertexHeight;
+            int i = 0;
 
-      file.Close();
-      makeIndicesSetData();
-    }
-
-    /// <summary>
-    /// Make a Terrain from 2 png texture files.  
-    /// Must have __XNA4__ capabilities to read from png files.
-    /// </summary>
-    /// <param name="theStage"></param>
-    /// <param name="label"></param>
-    /// <param name="heightFile"></param>
-    /// <param name="colorFile"></param>
-    public Terrain(Stage theStage, string label, string heightFile, string colorFile)
-       : base(theStage, label)
-    {
-      Texture2D heightTexture, colorTexture;
-      Microsoft.Xna.Framework.Color[] heightMap, colorMap;
-      constructorInit();  // common constructor initialization code, base call sets "stage"
-      heightTexture = stage.Content.Load<Texture2D>(heightFile);
-      heightMap =
-         new Microsoft.Xna.Framework.Color[width * height];
-      heightTexture.GetData<Microsoft.Xna.Framework.Color>(heightMap);
-      // create colorMap values from colorTexture
-      colorTexture = stage.Content.Load<Texture2D>(colorFile);
-      colorMap =
-         new Microsoft.Xna.Framework.Color[width * height];
-      colorTexture.GetData<Microsoft.Xna.Framework.Color>(colorMap);
-      // create  vertices for terrain
-      Vector4 vector4;
-      int vertexHeight;
-      int i = 0;
-
-      //Color array for height values
-      Color[] ColorMap =
-      {
+            //Color array for height values
+            Color[] ColorMap =
+            {
         new Color( 143/255f, 93/255f, 72/255f ),
         new Color( 172/255f, 128/255f, 84/255f ),
         new Color( 199/255f, 159/255f, 120/255f),
@@ -118,255 +118,268 @@ namespace AGMGSKv9
         new Color( 1f, 1f, 1f )
       };
 
-      //Creat RNG
-      Random rand = new Random();
-      //Initialize 2x2 array for height map generation
-      float[,] Heights = new float[2, 2]
-      {{ rand.Next(0,(int)maxHeight), rand.Next(0,(int)maxHeight)},{rand.Next(0,(int)maxHeight),rand.Next(0,(int)maxHeight) } };
-      Vector2 MountainPosition = new Vector2(rand.Next(25, 75) / 100f, rand.Next(25, 75) / 100f);
-      Debug.WriteLine(MountainPosition.X);
-      /*for (int h = 0; h < 2; h++)
-        for (int w = 0; w < 2; w++)
-          Heights[w,h] = rand.Next(0, 255);*/
-      //Strength of noise applied
-      float NoiseStrength = 0.75f;
+            //Creat RNG
+            Random rand = new Random();
+            //Initialize 2x2 array for height map generation
+            float[,] Heights = new float[2, 2]
+            {{ rand.Next(0,(int)maxHeight), rand.Next(0,(int)maxHeight)},{rand.Next(0,(int)maxHeight),rand.Next(0,(int)maxHeight) } };
+            Vector2 MountainPosition = new Vector2(rand.Next(25, 75) / 100f, rand.Next(25, 75) / 100f);
+            Debug.WriteLine(MountainPosition.X);
+            /*for (int h = 0; h < 2; h++)
+              for (int w = 0; w < 2; w++)
+                Heights[w,h] = rand.Next(0, 255);*/
+            //Strength of noise applied
+            float NoiseStrength = 0.75f;
 
-      // Double array size and interpolate than apply noise
-      for (int o = 0; o < 8; o++)
-      {
-        Heights = DoubleArray(Heights);
-        ApplyNoise(Heights, (float)Math.Pow(NoiseStrength, o), rand, MountainPosition);
-      }
+            // Double array size and interpolate than apply noise
+            for (int o = 0; o < 8; o++)
+            {
+                Heights = DoubleArray(Heights);
+                ApplyNoise(Heights, (float)Math.Pow(NoiseStrength, o), rand, MountainPosition);
+            }
 
-      //Gaussian blur height values
-      Heights = ApplyGaussian(Heights);
-
-
+            //Gaussian blur height values
+            Heights = ApplyGaussian(Heights);
 
 
-      for (int z = 0; z < height; z++)
-        for (int x = 0; x < width; x++)
-        {
-          vertexHeight = (int)(Heights[x, z]);   // Set vertex height to value generated in array
-          vertexHeight *= multiplier;               // Scale height
-          terrainHeight[x, z] = vertexHeight;       // save height for navigation
-          vertex[i] = new VertexPositionColor(
-             new Vector3(x * spacing, vertexHeight, z * spacing), // Set vertex values
-             MapColor(ColorMap, Heights[x, z], rand) // Generate color depending on height
-             );
-          i++;
-        }
-      // free up unneeded maps
-      colorMap = null;
-      heightMap = null;
-      makeIndicesSetData();
-    }
 
-    private void constructorInit()
-    {
-      range = stage.Range;
-      width = height = range;
-      nVertices = width * height;
-      terrainHeight = new int[width, height];
-      vertex = new VertexPositionColor[nVertices];
-      nIndices = (width - 1) * (height - 1) * 6;
-      indices = new int[nIndices];  // there are 6 indices 2 faces / 4 vertices 
-      spacing = stage.Spacing;
-      // set display information 
-      display = stage.Display;
-      effect = stage.SceneEffect;
-    }
 
-    private void makeIndicesSetData()
-    {
-      // set indices clockwise from point of view ... surfaces really left handed
-      int i = 0;
-      for (int z = 0; z < height - 1; z++)
-        for (int x = 0; x < width - 1; x++)
-        {
-          indices[i++] = z * width + x;
-          indices[i++] = z * width + x + 1;
-          indices[i++] = (z + 1) * width + x;
-          indices[i++] = (z + 1) * width + x;
-          indices[i++] = z * width + x + 1;
-          indices[i++] = (z + 1) * width + x + 1;
+            for (int z = 0; z < height; z++)
+                for (int x = 0; x < width; x++)
+                {
+                    vertexHeight = (int)(Heights[x, z]);   // Set vertex height to value generated in array
+                    vertexHeight *= multiplier;               // Scale height
+                    terrainHeight[x, z] = vertexHeight;       // save height for navigation
+                    vertex[i] = new VertexPositionColor(
+                       new Vector3(x * spacing, vertexHeight, z * spacing), // Set vertex values
+                       MapColor(ColorMap, Heights[x, z], rand) // Generate color depending on height
+                       );
+                    i++;
+                }
+            // free up unneeded maps
+            colorMap = null;
+            heightMap = null;
+            makeIndicesSetData();
         }
 
-      // create VertexBuffer and store on GPU
-      vb = new VertexBuffer(display, typeof(VertexPositionColor), vertex.Length, BufferUsage.WriteOnly);
-      vb.SetData<VertexPositionColor>(vertex); // , 0, vertex.Length);
-      // create IndexBuffer and store on GPU
-      ib = new IndexBuffer(display, typeof(int), indices.Length, BufferUsage.WriteOnly);
-      IB.SetData<int>(indices);
-    }
-
-
-    // Properties
-
-    public int Spacing
-    {
-      get { return stage.Spacing; }
-    }
-
-    // Methods
-
-    ///<summary>
-    /// Height of  surface containing position (x,z) terrain coordinates.
-    /// This method is a "stub" for the correct get code.
-    /// How would you determine a surface's height at (x,?,z) ? 
-    /// </summary>
-    /// <param name="x"> left -- right terrain position </param>
-    /// <param name="z"> forward -- backward terrain position</param>
-    /// <returns> vertical height of surface containing position (x,z)</returns>
-    public float surfaceHeight(int x, int z)
-    {
-      if (x < 0 || x > 511 || z < 0 || z > 511) return 0.0f;  // index valid ?
-      return (float)terrainHeight[x, z];
-    }
-
-    public override void Draw(GameTime gameTime)
-    {
-      effect.VertexColorEnabled = true;
-      effect.DirectionalLight0.DiffuseColor = stage.DiffuseLight;
-      effect.AmbientLightColor = stage.AmbientLight;
-      effect.DirectionalLight0.Direction = stage.LightDirection;
-      effect.DirectionalLight0.Enabled = true;
-      effect.View = stage.View;
-      effect.Projection = stage.Projection;
-      effect.World = Matrix.Identity;
-      foreach (EffectPass pass in effect.CurrentTechnique.Passes)
-      {
-        pass.Apply();
-        display.SetVertexBuffer(vb);
-        display.Indices = ib;
-        // display.DrawIndexedPrimitives(PrimitiveType.TriangleList,0,0,nVertices,
-        // 0, nIndices/3); // deprecated in MonoGames 3.5
-        display.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, nIndices / 3);
-      }
-    }
-
-    // Print 2D array for debugging
-    public void PrintArray(float[,] arr)
-    {
-      double count = Math.Sqrt(arr.Length);
-      for (int h = 0; h < count; h++)
-      {
-        for (int w = 0; w < count; w++)
+        private void constructorInit()
         {
-          Debug.Write(arr[w, h] + "\t");
+            range = stage.Range;
+            width = height = range;
+            nVertices = width * height;
+            terrainHeight = new int[width, height];
+            vertex = new VertexPositionColor[nVertices];
+            nIndices = (width - 1) * (height - 1) * 6;
+            indices = new int[nIndices];  // there are 6 indices 2 faces / 4 vertices 
+            spacing = stage.Spacing;
+            // set display information 
+            display = stage.Display;
+            effect = stage.SceneEffect;
         }
-        Debug.Write("\n");
-      }
-      Debug.Write("\n");
-    }
 
-    // Modify values within 2D array with noise of specified strength multiplier
-    public void ApplyNoise(float[,] arr, float Strength, Random rand, Vector2 Mountain)
-    {
-      double count = Math.Sqrt(arr.Length);
-      for (int h = 0; h < count; h++)
-      {
-        for (int w = 0; w < count; w++)
+        private void makeIndicesSetData()
         {
-          float tempStrength = Strength;
-          // Bottom right corner strength reduced for smoother terrain
-          if (w > 4 * count / 6 && h > 4 * count / 6) tempStrength *= 0.5f * rand.Next(0, (int)maxHeight) / maxHeight;
-          //if (w < count / 2 && h < count / 2) tempStrength *= 0.8f * rand.Next(0, (int)maxHeight) / maxHeight;
-          //arr[w,h] = Math.Min(Math.Max(arr[w,h] + (rand.Next(0, 255) - 128f) * tempStrength, 0), 255.0f);
-          if (w == (int)(Mountain.X * count) && h == (int)(Mountain.Y * count)) arr[w, h] = maxHeight * 2.0f;
-          else arr[w, h] = Math.Max(arr[w, h] + (rand.Next(0, 255) - 128f) * tempStrength, 0);
+            // set indices clockwise from point of view ... surfaces really left handed
+            int i = 0;
+            for (int z = 0; z < height - 1; z++)
+                for (int x = 0; x < width - 1; x++)
+                {
+                    indices[i++] = z * width + x;
+                    indices[i++] = z * width + x + 1;
+                    indices[i++] = (z + 1) * width + x;
+                    indices[i++] = (z + 1) * width + x;
+                    indices[i++] = z * width + x + 1;
+                    indices[i++] = (z + 1) * width + x + 1;
+                }
+
+            // create VertexBuffer and store on GPU
+            vb = new VertexBuffer(display, typeof(VertexPositionColor), vertex.Length, BufferUsage.WriteOnly);
+            vb.SetData<VertexPositionColor>(vertex); // , 0, vertex.Length);
+                                                     // create IndexBuffer and store on GPU
+            ib = new IndexBuffer(display, typeof(int), indices.Length, BufferUsage.WriteOnly);
+            IB.SetData<int>(indices);
         }
-      }
-    }
 
-    //Double size of array (4x more members) and interpolate values for between
-    public float[,] DoubleArray(float[,] arr)
-    {
-      double count = Math.Sqrt(arr.Length);
-      int newCount = (int)count * 2;
-      float[,] newArr = new float[newCount, newCount];
 
-      //Horizontal Interpolation Pass
-      for (int h = 0; h < newCount; h = h + 2)
-      {
-        for (int w = 0; w < newCount; w++)
+        // Properties
+
+        public int Spacing
         {
-          if (w == newCount - 1 || w % 2 == 0)
-            newArr[w, h] = arr[w / 2, h / 2];
-          else
-            newArr[w, h] = (arr[w / 2, h / 2] + arr[(w / 2) + 1, h / 2]) / 2.0f;
+            get { return stage.Spacing; }
         }
-      }
-      //Vertical Interpolation Pass
-      for (int h = 1; h < newCount; h = h + 2)
-      {
-        for (int w = 0; w < newCount; w++)
+
+        // Methods
+
+        ///<summary>
+        /// Height of  surface containing position (x,z) terrain coordinates.
+        /// This method is a "stub" for the correct get code.
+        /// How would you determine a surface's height at (x,?,z) ? 
+        /// </summary>
+        /// <param name="x"> left -- right terrain position </param>
+        /// <param name="z"> forward -- backward terrain position</param>
+        /// <returns> vertical height of surface containing position (x,z)</returns>
+        public float surfaceHeight(int x, int z)
         {
-          if (h == newCount - 1)
-            newArr[w, h] = newArr[w, h - 1];
-          else
-            newArr[w, h] = (newArr[w, h - 1] + newArr[w, h + 1]) / 2.0f;
+            if (x < 0 || x > 511 || z < 0 || z > 511) return 0.0f;  // index valid ?
+            return (float)terrainHeight[x, z];
         }
-      }
 
-      return newArr;
-    }
-
-    //Apply gaussian blur on 2d array of values
-    public float[,] ApplyGaussian(float[,] arr)
-    {
-			float radius = 1.1f; // Actually the Standard Deviation but also the number max number of elements from center we'll sample
-      double count = Math.Sqrt(arr.Length);
-      //Horizontal Pass
-      for (int h = 0; h < count; h++)
-      {
-        for (int w = 0; w < count; w++)
+        public override void Draw(GameTime gameTime)
         {
-					double finalHeight = 0; //Tracker for height of vertex
-					for ( float r = -2f * radius; r <= 2f*radius; r++ ) // Go from radius to radius
-					{
-						int e = (int)Math.Min(Math.Max(0, w + r), count - 1); //Clamp radius so it stays in bounds
-						double weight = (1f / Math.Sqrt(2 * Math.PI * (float)radius * (float)radius)) * Math.Exp(-1f * (r * r) / (2 * radius * radius));// Calculate weight of each element
-						finalHeight += weight * arr[e, h];
-					}
-					arr[w, h] = (float)finalHeight;
-				}
-      }
-      //Vertical Pass, same as above except y-value changes when sampling
-      for (int h = 0; h < count; h++)
-      {
-        for (int w = 0; w < count; w++)
+            effect.VertexColorEnabled = true;
+            effect.DirectionalLight0.DiffuseColor = stage.DiffuseLight;
+            effect.AmbientLightColor = stage.AmbientLight;
+            effect.DirectionalLight0.Direction = stage.LightDirection;
+            effect.DirectionalLight0.Enabled = true;
+            effect.View = stage.View;
+            effect.Projection = stage.Projection;
+            effect.World = Matrix.Identity;
+            foreach (EffectPass pass in effect.CurrentTechnique.Passes)
+            {
+                pass.Apply();
+                display.SetVertexBuffer(vb);
+                display.Indices = ib;
+                // display.DrawIndexedPrimitives(PrimitiveType.TriangleList,0,0,nVertices,
+                // 0, nIndices/3); // deprecated in MonoGames 3.5
+                display.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, nIndices / 3);
+            }
+        }
+
+        // Print 2D array for debugging
+        public void PrintArray(float[,] arr)
         {
-					double finalHeight = 0;
-					for (float r = -2f * radius; r <= 2f * radius; r++)
-					{
-						double weight = (1f / Math.Sqrt(2 * Math.PI * (float)radius * (float)radius)) * Math.Exp(-1 * (r * r) / (2 * radius * radius));
-						int e = (int)Math.Min(Math.Max(0, h + r), count - 1);
-						finalHeight += weight * arr[w, e];
-					}
-					arr[w, h] = (float)finalHeight;
-				}
-      }
+            double count = Math.Sqrt(arr.Length);
+            for (int h = 0; h < count; h++)
+            {
+                for (int w = 0; w < count; w++)
+                {
+                    Debug.Write(arr[w, h] + "\t");
+                }
+                Debug.Write("\n");
+            }
+            Debug.Write("\n");
+        }
 
-      return arr;
+        // Modify values within 2D array with noise of specified strength multiplier
+        public void ApplyNoise(float[,] arr, float Strength, Random rand, Vector2 Mountain)
+        {
+            float mountainRadius = 150f / 512f;
+            float weightExp = 16f;
+            float maxWeightNoise = 0.001f;
+            double count = Math.Sqrt(arr.Length);
+            for (int h = 0; h < count; h++)
+            {
+                for (int w = 0; w < count; w++)
+                {
+                    float tempStrength = Strength;
+                    // Bottom right corner strength reduced for smoother terrain
+                    if (w > 4 * count / 6 && h > 4 * count / 6) tempStrength *= 0.5f * rand.Next(0, (int)maxHeight) / maxHeight;
+
+                    //if (w == (int)(Mountain.X * count) && h == (int)(Mountain.Y * count)) arr[w, h] = maxHeight * 4.0f;
+
+                    float weight = Vector2.Distance(Mountain, new Vector2((float)w / (float)count, (float)h / (float)count)) / mountainRadius; // Calculate distance and get ratio to mountain radius
+                    weight = Math.Min(weight, 1f); // Clamp weight to 1 max
+                    weight = (float)Math.Pow(weight, 1/weightExp); // Use exponential of weight for better shaping
+                    weight += (float)rand.Next(0, 512) / 512f * maxWeightNoise;
+
+
+
+
+                    arr[w, h] = weight * arr[w,h] + (1 - weight) * 4f * maxHeight;
+                    arr[w, h] = Math.Max(arr[w, h] + (rand.Next(0, 255) - 128f) * tempStrength, 0);
+                }
+            }
+        }
+
+        //Double size of array (4x more members) and interpolate values for between
+        public float[,] DoubleArray(float[,] arr)
+        {
+            double count = Math.Sqrt(arr.Length);
+            int newCount = (int)count * 2;
+            float[,] newArr = new float[newCount, newCount];
+
+            //Horizontal Interpolation Pass
+            for (int h = 0; h < newCount; h = h + 2)
+            {
+                for (int w = 0; w < newCount; w++)
+                {
+                    if (w == newCount - 1 || w % 2 == 0)
+                        newArr[w, h] = arr[w / 2, h / 2];
+                    else
+                        newArr[w, h] = (arr[w / 2, h / 2] + arr[(w / 2) + 1, h / 2]) / 2.0f;
+                }
+            }
+            //Vertical Interpolation Pass
+            for (int h = 1; h < newCount; h = h + 2)
+            {
+                for (int w = 0; w < newCount; w++)
+                {
+                    if (h == newCount - 1)
+                        newArr[w, h] = newArr[w, h - 1];
+                    else
+                        newArr[w, h] = (newArr[w, h - 1] + newArr[w, h + 1]) / 2.0f;
+                }
+            }
+
+            return newArr;
+        }
+
+        //Apply gaussian blur on 2d array of values
+        public float[,] ApplyGaussian(float[,] arr)
+        {
+            float radius = 5f; // Maximum radius to sample from the current vertex
+            float stdDev = 2.0f; // Standard Deviation for the Gaussian calculation
+            double count = Math.Sqrt(arr.Length);
+            //Horizontal Pass
+            for (int h = 0; h < count; h++)
+            {
+                for (int w = 0; w < count; w++)
+                {
+                    double finalHeight = 0; //Tracker for height of vertex
+                    for (float r = -2f * radius; r <= 2f * radius; r++) // Go from radius to radius
+                    {
+                        int e = (int)Math.Min(Math.Max(0, w + r), count - 1); //Clamp radius so it stays in bounds
+                        double weight = (1f / Math.Sqrt(2 * Math.PI * (float)stdDev * (float)stdDev)) * Math.Exp(-1f * (r * r) / (2 * stdDev * stdDev));// Calculate weight of each element
+                        finalHeight += weight * arr[e, h];
+                    }
+                    arr[w, h] = (float)finalHeight;
+                }
+            }
+            //Vertical Pass, same as above except y-value changes when sampling
+            for (int h = 0; h < count; h++)
+            {
+                for (int w = 0; w < count; w++)
+                {
+                    double finalHeight = 0;
+                    for (float r = -2f * radius; r <= 2f * radius; r++)
+                    {
+                        double weight = (1f / Math.Sqrt(2 * Math.PI * (float)stdDev * (float)stdDev)) * Math.Exp(-1 * (r * r) / (2 * stdDev * stdDev));
+                        int e = (int)Math.Min(Math.Max(0, h + r), count - 1);
+                        finalHeight += weight * arr[w, e];
+                    }
+                    arr[w, h] = (float)finalHeight;
+                }
+            }
+
+            return arr;
+        }
+
+        // Generate color based on height of vertex with random noise added
+        public Color MapColor(Color[] colorMap, float vertexHeight, Random rand)
+        {
+            int strength = 1; // strength of noise out of 256
+            int weightPower = 1; // Power of exponent to modify weight
+            float discretion = maxHeight / (colorMap.Length - 1); // range of values that would have similar height color, used to determine base colormap index
+            Vector4 lowcolor = colorMap[(int)Math.Min((int)(vertexHeight / discretion), colorMap.Length - 1)].ToVector4(); // get lower color from color map
+            Vector4 highcolor = colorMap[(int)Math.Min((int)(vertexHeight / discretion) + 1, colorMap.Length - 1)].ToVector4(); // get higher color from color map
+            float highweight = (vertexHeight - (int)(vertexHeight / discretion) * discretion) / discretion; // calculate weight if higher color
+            Vector4 mix = (1 - (float)Math.Pow(highweight, weightPower)) * lowcolor + ((float)Math.Pow(highweight, weightPower)) * highcolor; // mix colors together
+            float vnoise = rand.Next(-strength, strength) / 256f; // Generate noise
+                                                                  //float vnoise = 0;
+
+            return new Color(mix.X + vnoise, mix.Y + vnoise, mix.Z + vnoise, 1f); //apply noise and return
+
+        }
+
     }
-
-    // Generate color based on height of vertex with random noise added
-    public Color MapColor(Color[] colorMap, float vertexHeight, Random rand)
-    {
-      int strength = 1; // strength of noise out of 256
-      int weightPower = 1; // Power of exponent to modify weight
-      float discretion = maxHeight / (colorMap.Length - 1); // range of values that would have similar height color, used to determine base colormap index
-      Vector4 lowcolor = colorMap[(int)Math.Min((int)(vertexHeight / discretion), colorMap.Length - 1)].ToVector4(); // get lower color from color map
-      Vector4 highcolor = colorMap[(int)Math.Min((int)(vertexHeight / discretion) + 1, colorMap.Length - 1)].ToVector4(); // get higher color from color map
-      float highweight = (vertexHeight - (int)(vertexHeight / discretion) * discretion) / discretion; // calculate weight if higher color
-      Vector4 mix = (1 - (float)Math.Pow(highweight, weightPower)) * lowcolor + ((float)Math.Pow(highweight, weightPower)) * highcolor; // mix colors together
-      float vnoise = rand.Next(-strength, strength)/256f; // Generate noise
-      //float vnoise = 0;
-
-      return new Color(mix.X + vnoise, mix.Y + vnoise, mix.Z + vnoise, 1f); //apply noise and return
-
-    }
-
-  }
 }
