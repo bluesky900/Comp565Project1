@@ -57,7 +57,7 @@ namespace AGMGSKv9
         private int treasureCount;
         //Treasure Goal boolean
         private bool treasurePath;
-		private int expectedTreasureCount;
+        public bool lockState = false;
 
         public int treasure_count
         {
@@ -65,13 +65,6 @@ namespace AGMGSKv9
             set { this.treasureCount = value; }
         }
 
-		public bool treasureSearch{
-			get { return this.treasurePath;}
-			set { this.treasurePath = value;
-				  this.expectedTreasureCount = treasureCount;
-				}
-		}
-		
         // If using makePath(int[,]) set WayPoint (x, z) vertex positions in the following array
         private int[,] pathNode = { {505, 490}, {500, 500}, {490, 505},  // bottom, right
 										 {435, 505}, {425, 500}, {420, 490},  // bottom, middle
@@ -125,24 +118,12 @@ namespace AGMGSKv9
 
             if (this.treasurePath)
             {
-				if(this.expectedTreasureCount == treasureCount){
-					++expectedTreasureCount;
-					for (int i = 0; i < this.treasureList.getTreasureNode.Length; i++)
-						{
-							if (this.treasureList.getTreasureNode[i].isTagged)
-								continue;
-
-							distance2 = Vector2.Distance(new Vector2(agentObject.Translation.X, agentObject.Translation.Z),
-														new Vector2(this.treasureList.getTreasureNode[i].x * this.stage.Spacing, this.treasureList.getTreasureNode[i].z * this.stage.Spacing));
-
-							if (distance2 < distance)
-							{
-								//Make the treasure the new goal
-								this.treasureListNum = i;
-								distance = distance2;
-							}
-						}
-				}
+                //Is the treasure still there?
+                if (this.treasureList.getTreasureNode[this.treasureListNum].isTagged)
+                {
+                    //Treasure is gone.. we go back to normal path
+                    this.treasurePath = false;
+                }
 
                 //Adjust the facing location towards the treasure goal
                 agentObject.turnToFace(new Vector3(this.treasureList.getTreasureNode[this.treasureListNum].x * this.stage.Terrain.Spacing,
@@ -153,7 +134,8 @@ namespace AGMGSKv9
                 distance = Vector2.Distance(new Vector2(agentObject.Translation.X, agentObject.Translation.Z),
                                             new Vector2(this.treasureList.getTreasureNode[this.treasureListNum].x * this.stage.Spacing, this.treasureList.getTreasureNode[this.treasureListNum].z * this.stage.Spacing));
 
-                if (distance < 200.0f){
+                if (distance < (this.stage.Terrain.Spacing * 2))
+                {
                     //We are within range! Collect the treasure and set the treasure as tagged.
                     this.treasureCount += 1;
                     this.treasureList.getTreasureNode[this.treasureListNum].isTagged = true;
@@ -161,6 +143,11 @@ namespace AGMGSKv9
                     //Change path back to normal
                     this.treasurePath = false;
                 }
+
+                if (keyboardState.IsKeyDown(Keys.N) && !lockState) { this.treasurePath = false; lockState = true; }
+
+
+
             }
             else
             {
@@ -180,9 +167,43 @@ namespace AGMGSKv9
                     nextGoal = path.NextNode;
                     // agentObject.turnToFace(nextGoal.Translation);
                 }
-                    distance = float.MaxValue;    
+                //Debug.WriteLine(this.treasurePath);
+                if (keyboardState.IsKeyDown(Keys.N) && !lockState)
+                {
+                    lockState = true;
+                    distance = float.MaxValue;
+
+                    //We'll need to find the closest untagged treasure to the agent
+                    for (int i = 0; i < this.treasureList.getTreasureNode.Length; i++)
+                    {
+                        if (this.treasureList.getTreasureNode[i].isTagged)
+                            continue;
+
+                        distance2 = Vector2.Distance(new Vector2(agentObject.Translation.X, agentObject.Translation.Z),
+                                                    new Vector2(this.treasureList.getTreasureNode[i].x * this.stage.Spacing, this.treasureList.getTreasureNode[i].z * this.stage.Spacing));
+
+                        if (distance2 < distance)
+                        {
+                            //Make the treasure the new goal
+                            this.treasureListNum = i;
+                            distance = distance2;
+                        }
+
+
+                    }
+
+                    //Did we manage to find a new target?
+                    if (distance != float.MaxValue)
+                    {
+                        this.treasurePath = true;
+
+                    }
+
+                }
+
             }
-			base.Update(gameTime);  // Agent's Update();
+            if (keyboardState.IsKeyUp(Keys.N)) lockState = false;
+            base.Update(gameTime);  // Agent's Update();
         }
     }
 }
