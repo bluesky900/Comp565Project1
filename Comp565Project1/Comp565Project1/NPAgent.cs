@@ -23,6 +23,7 @@
 using System;
 using System.IO;  // needed for trace()'s fout
 using System.Collections.Generic;
+using System.Diagnostics; // For Debug
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -120,6 +121,7 @@ namespace AGMGSKv9
         public override void Update(GameTime gameTime)
         {
             float distance, distance2;
+            KeyboardState keyboardState = Keyboard.GetState(); 
 
             if (this.treasurePath)
             {
