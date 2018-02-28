@@ -289,25 +289,27 @@ public class Stage : Game {
             else
             {
 
-                float xA, yA, zA;
-                float xB, yB, zB;
-                float xC, yC, zC;
-                float xD, yD, zD;
+                //vertexes A, B, C, and D each represent one vertex of the square the game object is currently located on
 
-                float x, z;
+                float xPos, zPos;
                 float xy, zy;
 
-                float distA, distD;
+                float xA, yA, zA; //position of Vertex A
+                float xB, yB, zB; //position of Vertex B
+                float xC, yC, zC; //position of Vertex C
+                float xD, yD, zD; //position of Vertex D
 
-                Vector3 A, B, C, D;
+                float distFromA, distFromD;
 
-                //First, get the position of the object and position of its upper-left hand vertex
-                x = anObject3D.Translation.X;
-                xA = ((Int32)(x / terrain.Spacing)) * terrain.Spacing;
-                z = anObject3D.Translation.Z;
-                zA = ((Int32)(z / terrain.Spacing)) * terrain.Spacing;
+                Vector3 vertA, vertB, vertC, vertD;
 
-                //With this information, we can now calculate the remaining 3 corners of the square
+                //Find where the object is and locate its upper left vertex
+                xPos = anObject3D.Translation.X;
+                xA = ((Int32)(xPos / terrain.Spacing)) * terrain.Spacing;
+                zPos = anObject3D.Translation.Z;
+                zA = ((Int32)(zPos / terrain.Spacing)) * terrain.Spacing;
+
+                //find vertices of the rest of the square
                 xB = xA + terrain.Spacing;
                 zB = zA;
                 xC = xA;
@@ -320,34 +322,32 @@ public class Stage : Game {
                 yC = terrain.surfaceHeight((int)(xC / terrain.Spacing), (int)(zC / terrain.Spacing));
                 yD = terrain.surfaceHeight((int)(xD / terrain.Spacing), (int)(zD / terrain.Spacing));
 
-                A = new Vector3(xA, yA, zA);
-                B = new Vector3(xB, yB, zB);
-                C = new Vector3(xC, yC, zC);
-                D = new Vector3(xD, yD, zD);
+                vertA = new Vector3(xA, yA, zA);
+                vertB = new Vector3(xB, yB, zB);
+                vertC = new Vector3(xC, yC, zC);
+                vertD = new Vector3(xD, yD, zD);
 
-                //Now, we'll need to determine if we are in the top or bottom triangle
+                //which half of the square are we on
 
-                distA = Vector2.Distance(new Vector2(A.X, A.Z), new Vector2(x, z));
-                distD = Vector2.Distance(new Vector2(D.X, D.Z), new Vector2(x, z));
+                distFromA = Vector2.Distance(new Vector2(vertA.X, vertA.Z), new Vector2(xPos, zPos));
+                distFromD = Vector2.Distance(new Vector2(vertD.X, vertD.Z), new Vector2(xPos, zPos));
 
-                if (distA < distD)  //Top triangle
+                if (distFromA < distFromD)  //Top half
                 {
-                    //From C -> D
-                    xy = Vector3.Lerp(A, B, ((float)(x - xA)) / Spacing).Y - A.Y;
-                    zy = Vector3.Lerp(A, C, ((float)(z - zA)) / Spacing).Y - A.Y;
 
-                    anObject3D.Translation = new Vector3(anObject3D.Translation.X, A.Y + xy + zy, anObject3D.Translation.Z);
+                    xy = Vector3.Lerp(vertA, vertB, ((float)(xPos - xA)) / Spacing).Y - vertA.Y;
+                    zy = Vector3.Lerp(vertA, vertC, ((float)(zPos - zA)) / Spacing).Y - vertA.Y;
 
+                    anObject3D.Translation = new Vector3(anObject3D.Translation.X, vertA.Y + xy + zy, anObject3D.Translation.Z);
 
                 }
-                else  //Bottom triangle
+                else  //Bottom half
                 {
-                    //From C -> D
-                    xy = Vector3.Lerp(D, C, ((float)(xD - x)) / Spacing).Y - D.Y;
-                    zy = Vector3.Lerp(D, B, ((float)(zD - z)) / Spacing).Y - D.Y;
 
-                    anObject3D.Translation = new Vector3(anObject3D.Translation.X, D.Y + xy + zy, anObject3D.Translation.Z);
+                    xy = Vector3.Lerp(vertD, vertC, ((float)(xD - xPos)) / Spacing).Y - vertD.Y;
+                    zy = Vector3.Lerp(vertD, vertB, ((float)(zD - zPos)) / Spacing).Y - vertD.Y;
 
+                    anObject3D.Translation = new Vector3(anObject3D.Translation.X, vertD.Y + xy + zy, anObject3D.Translation.Z);
 
                 }
             }
@@ -441,7 +441,7 @@ public class Stage : Game {
 		terrain = new Terrain(this, "terrain", "heightTexture", "colorTexture");
       Components.Add(terrain);
 
-      //Add treasure locations and meshes to map (this needs to be done before agent loads)
+      //Add treasure locations and meshes to map
       treasure = new TreasureList(this, "TreasureList", "ChestClosed", false);
       Components.Add(treasure);
 

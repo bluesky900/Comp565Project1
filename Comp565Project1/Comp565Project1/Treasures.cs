@@ -46,7 +46,7 @@ namespace AGMGSKv6
             Random random = new Random();
 
 
-            //The following represents a list of treausre locations..
+            //List of treausre locations
             int[,] treasure = {
                                   { random.Next(384,512),random.Next(384, 512) },
                                   { random.Next(384,512),random.Next(384, 512) },

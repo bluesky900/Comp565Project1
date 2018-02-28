@@ -22,3 +22,9 @@ G:\Skyler\Documents\CSUN\Comp565Project1\Comp565Project1\Comp565Project1\obj\x86
 G:\Skyler\Documents\CSUN\Comp565Project1\Comp565Project1\Comp565Project1\obj\x86\Debug\Comp565Project1.exe
 G:\Skyler\Documents\CSUN\Comp565Project1\Comp565Project1\Comp565Project1\obj\x86\Debug\Comp565Project1.pdb
 G:\Skyler\Documents\CSUN\Comp565Project1\Comp565Project1\Comp565Project1\obj\x86\Debug\Comp565Project1.csprojResolveAssemblyReference.cache
+G:\Skyler\Documents\CSUN\Comp565Project1\Comp565Project1\Comp565Project1\bin\Windows\x86\Debug\Content\ChestClosed.xnb
+G:\Skyler\Documents\CSUN\Comp565Project1\Comp565Project1\Comp565Project1\bin\Windows\x86\Debug\Content\ChestOpenEmpty.xnb
+G:\Skyler\Documents\CSUN\Comp565Project1\Comp565Project1\Comp565Project1\bin\Windows\x86\Debug\Content\cloudV3.xnb
+G:\Skyler\Documents\CSUN\Comp565Project1\Comp565Project1\Comp565Project1\bin\Windows\x86\Debug\Content\dogv6.xnb
+G:\Skyler\Documents\CSUN\Comp565Project1\Comp565Project1\Comp565Project1\bin\Windows\x86\Debug\Content\magentaAvatarV6.xnb
+G:\Skyler\Documents\CSUN\Comp565Project1\Comp565Project1\Comp565Project1\bin\Windows\x86\Debug\Content\redAvatarV6.xnb
