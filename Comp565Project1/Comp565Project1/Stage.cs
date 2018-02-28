@@ -26,7 +26,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using AGMGSKv6;
-using System.Diagnostics; // For Debug
 #endregion
 
 namespace AGMGSKv9 {
@@ -109,7 +108,6 @@ public class Stage : Game {
 	private StreamWriter fout = null;
 	// Stage variables
 	private TimeSpan time;  // if you need to know the time see Property Time
-        private bool useLerp = true;
 
     protected TreasureList treasure;
 
@@ -280,76 +278,71 @@ public class Stage : Game {
 	/// </summary>
 	/// <param name="anObject3D"> has  Translation.X and Translation.Y values</param>
    public void setSurfaceHeight(Object3D anObject3D) {
+            /* float terrainHeight = terrain.surfaceHeight( 
+                   (int) (anObject3D.Translation.X / spacing), 
+                   (int) (anObject3D.Translation.Z / spacing) );
+             anObject3D.Translation = new Vector3( anObject3D.Translation.X, terrainHeight, 
+                   anObject3D.Translation.Z);*/
+            float xA, yA, zA;
+            float xB, yB, zB;
+            float xC, yC, zC;
+            float xD, yD, zD;
 
-            if (!useLerp)
+            float x, z;
+            float xy, zy;
+
+            float distA, distD;
+
+            Vector3 A, B, C, D;
+
+            //First, get the position of the object and position of its upper-left hand vertex
+            x = anObject3D.Translation.X;
+            xA = ((Int32)(x / terrain.Spacing)) * terrain.Spacing;
+            z = anObject3D.Translation.Z;
+            zA = ((Int32)(z / terrain.Spacing)) * terrain.Spacing;
+
+            //With this information, we can now calculate the remaining 3 corners of the square
+            xB = xA + terrain.Spacing;
+            zB = zA;
+            xC = xA;
+            zC = zA + terrain.Spacing;
+            xD = xB;
+            zD = zC;
+
+            yA = terrain.surfaceHeight((int)(xA / terrain.Spacing), (int)(zA / terrain.Spacing));
+            yB = terrain.surfaceHeight((int)(xB / terrain.Spacing), (int)(zB / terrain.Spacing));
+            yC = terrain.surfaceHeight((int)(xC / terrain.Spacing), (int)(zC / terrain.Spacing));
+            yD = terrain.surfaceHeight((int)(xD / terrain.Spacing), (int)(zD / terrain.Spacing));
+
+            A = new Vector3(xA, yA, zA);
+            B = new Vector3(xB, yB, zB);
+            C = new Vector3(xC, yC, zC);
+            D = new Vector3(xD, yD, zD);
+
+            //Now, we'll need to determine if we are in the top or bottom triangle
+
+            distA = Vector2.Distance(new Vector2(A.X, A.Z), new Vector2(x, z));
+            distD = Vector2.Distance(new Vector2(D.X, D.Z), new Vector2(x, z));
+
+            if (distA < distD)  //Top triangle
             {
-                float terrainHeight = terrain.surfaceHeight( (int)(anObject3D.Translation.X / spacing), (int)(anObject3D.Translation.Z / spacing));
-                anObject3D.Translation = new Vector3(anObject3D.Translation.X, terrainHeight, anObject3D.Translation.Z);
+                //From C -> D
+                xy = Vector3.Lerp(A, B, ((float)(x - xA)) / Spacing).Y - A.Y;
+                zy = Vector3.Lerp(A, C, ((float)(z - zA)) / Spacing).Y - A.Y;
+
+                anObject3D.Translation = new Vector3(anObject3D.Translation.X, A.Y + xy + zy, anObject3D.Translation.Z);
+
+
             }
-            else
+            else  //Bottom triangle
             {
+                //From C -> D
+                xy = Vector3.Lerp(D, C, ((float)(xD - x)) / Spacing).Y - D.Y;
+                zy = Vector3.Lerp(D, B, ((float)(zD - z)) / Spacing).Y - D.Y;
 
-                float xA, yA, zA;
-                float xB, yB, zB;
-                float xC, yC, zC;
-                float xD, yD, zD;
-
-                float x, z;
-                float xy, zy;
-
-                float distA, distD;
-
-                Vector3 A, B, C, D;
-
-                //First, get the position of the object and position of its upper-left hand vertex
-                x = anObject3D.Translation.X;
-                xA = ((Int32)(x / terrain.Spacing)) * terrain.Spacing;
-                z = anObject3D.Translation.Z;
-                zA = ((Int32)(z / terrain.Spacing)) * terrain.Spacing;
-
-                //With this information, we can now calculate the remaining 3 corners of the square
-                xB = xA + terrain.Spacing;
-                zB = zA;
-                xC = xA;
-                zC = zA + terrain.Spacing;
-                xD = xB;
-                zD = zC;
-
-                yA = terrain.surfaceHeight((int)(xA / terrain.Spacing), (int)(zA / terrain.Spacing));
-                yB = terrain.surfaceHeight((int)(xB / terrain.Spacing), (int)(zB / terrain.Spacing));
-                yC = terrain.surfaceHeight((int)(xC / terrain.Spacing), (int)(zC / terrain.Spacing));
-                yD = terrain.surfaceHeight((int)(xD / terrain.Spacing), (int)(zD / terrain.Spacing));
-
-                A = new Vector3(xA, yA, zA);
-                B = new Vector3(xB, yB, zB);
-                C = new Vector3(xC, yC, zC);
-                D = new Vector3(xD, yD, zD);
-
-                //Now, we'll need to determine if we are in the top or bottom triangle
-
-                distA = Vector2.Distance(new Vector2(A.X, A.Z), new Vector2(x, z));
-                distD = Vector2.Distance(new Vector2(D.X, D.Z), new Vector2(x, z));
-
-                if (distA < distD)  //Top triangle
-                {
-                    //From C -> D
-                    xy = Vector3.Lerp(A, B, ((float)(x - xA)) / Spacing).Y - A.Y;
-                    zy = Vector3.Lerp(A, C, ((float)(z - zA)) / Spacing).Y - A.Y;
-
-                    anObject3D.Translation = new Vector3(anObject3D.Translation.X, A.Y + xy + zy, anObject3D.Translation.Z);
+                anObject3D.Translation = new Vector3(anObject3D.Translation.X, D.Y + xy + zy, anObject3D.Translation.Z);
 
 
-                }
-                else  //Bottom triangle
-                {
-                    //From C -> D
-                    xy = Vector3.Lerp(D, C, ((float)(xD - x)) / Spacing).Y - D.Y;
-                    zy = Vector3.Lerp(D, B, ((float)(zD - z)) / Spacing).Y - D.Y;
-
-                    anObject3D.Translation = new Vector3(anObject3D.Translation.X, D.Y + xy + zy, anObject3D.Translation.Z);
-
-
-                }
             }
         }
 
@@ -442,7 +435,7 @@ public class Stage : Game {
       Components.Add(terrain);
 
       //Add treasure locations and meshes to map (this needs to be done before agent loads)
-      treasure = new TreasureList(this, "TreasureList", "ChestClosed", false);
+      treasure = new TreasureList(this, "TreasureList", "redAvatarV6", false);
       Components.Add(treasure);
 
       // Load Agent mesh objects, meshes do not have textures
@@ -524,38 +517,35 @@ public class Stage : Game {
 			}
 		// Process user keyboard events that relate to the render state of the the stage
 		KeyboardState keyboardState = Keyboard.GetState();
-            if (keyboardState.IsKeyDown(Keys.Escape)) Exit();
-            else if (keyboardState.IsKeyDown(Keys.B) && !oldKeyboardState.IsKeyDown(Keys.B))
-                DrawBoundingSpheres = !DrawBoundingSpheres;
-            else if (keyboardState.IsKeyDown(Keys.C) && !oldKeyboardState.IsKeyDown(Keys.C))
-                setCamera(1);
-            else if (keyboardState.IsKeyDown(Keys.X) && !oldKeyboardState.IsKeyDown(Keys.X))
-                setCamera(-1);
-
-            // key event handlers needed for Inspector
-            // set help display on
-            else if (keyboardState.IsKeyDown(Keys.H) && !oldKeyboardState.IsKeyDown(Keys.H))
-            {
-                inspector.ShowHelp = !inspector.ShowHelp;
-                inspector.ShowMatrices = false;
-            }
-            // set info display on
-            else if (keyboardState.IsKeyDown(Keys.I) && !oldKeyboardState.IsKeyDown(Keys.I))
-                inspector.showInfo();
-            // set miscellaneous display on
-            else if (keyboardState.IsKeyDown(Keys.M) && !oldKeyboardState.IsKeyDown(Keys.M))
-            {
-                inspector.ShowMatrices = !inspector.ShowMatrices;
-                inspector.ShowHelp = false;
-            }
-            // toggle update speed between FixedStep and ! FixedStep
-            else if (keyboardState.IsKeyDown(Keys.T) && !oldKeyboardState.IsKeyDown(Keys.T)) FixedStepRendering = ! FixedStepRendering;
-            // Toggle LERP function on height
-            else if (keyboardState.IsKeyDown(Keys.L) && !oldKeyboardState.IsKeyDown(Keys.L)) { useLerp = !useLerp; }
-            oldKeyboardState = keyboardState;    // Update saved state.
+		if (keyboardState.IsKeyDown(Keys.Escape)) Exit();
+		else if (keyboardState.IsKeyDown(Keys.B) && !oldKeyboardState.IsKeyDown(Keys.B)) 
+		DrawBoundingSpheres = ! DrawBoundingSpheres;
+		else if (keyboardState.IsKeyDown(Keys.C) && !oldKeyboardState.IsKeyDown(Keys.C)) 
+		setCamera(1);
+		else if (keyboardState.IsKeyDown(Keys.X) && !oldKeyboardState.IsKeyDown(Keys.X))
+		setCamera(-1);
+		else if (keyboardState.IsKeyDown(Keys.N) && !oldKeyboardState.IsKeyDown(Keys.N))
+			NPAgent.treasureSearch = true;
+			
+	
+		// key event handlers needed for Inspector
+		// set help display on
+		else if (keyboardState.IsKeyDown(Keys.H) && !oldKeyboardState.IsKeyDown(Keys.H)) {
+			inspector.ShowHelp = ! inspector.ShowHelp; 
+			inspector.ShowMatrices = false; }
+		// set info display on
+		else if (keyboardState.IsKeyDown(Keys.I) && !oldKeyboardState.IsKeyDown(Keys.I)) 
+		inspector.showInfo();
+		// set miscellaneous display on
+		else if (keyboardState.IsKeyDown(Keys.M) && !oldKeyboardState.IsKeyDown(Keys.M)) {
+			inspector.ShowMatrices = ! inspector.ShowMatrices;
+			inspector.ShowHelp = false; }
+		// toggle update speed between FixedStep and ! FixedStep
+		else if (keyboardState.IsKeyDown(Keys.T) && !oldKeyboardState.IsKeyDown(Keys.T))
+		FixedStepRendering = ! FixedStepRendering;
+		oldKeyboardState = keyboardState;    // Update saved state.
 		base.Update(gameTime);  // update all GameComponents and DrawableGameComponents
 		currentCamera.updateViewMatrix();
-
 		}
 
    /// <summary>
@@ -567,7 +557,7 @@ public class Stage : Game {
    protected override void Draw(GameTime gameTime) {
       draws++;
       display.Viewport = defaultViewport; //sceneViewport;
-            display.Clear(new Color(1.0f, .75f, 1.0f));
+      display.Clear(Color.CornflowerBlue);
       // Draw into inspectorViewport
       display.Viewport = inspectorViewport;
       spriteBatch.Begin();
