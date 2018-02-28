@@ -532,7 +532,7 @@ public class Stage : Game {
 		else if (keyboardState.IsKeyDown(Keys.X) && !oldKeyboardState.IsKeyDown(Keys.X))
 		setCamera(-1);
 		else if (keyboardState.IsKeyDown(Keys.N) && !oldKeyboardState.IsKeyDown(Keys.N))
-			NPAgent.treasureSearch = true;
+		npAgent.treasureSearch = true;
 			
 	
 		// key event handlers needed for Inspector

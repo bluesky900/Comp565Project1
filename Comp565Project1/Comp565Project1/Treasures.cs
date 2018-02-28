@@ -43,13 +43,14 @@ namespace AGMGSKv6
             : base(theStage, label, meshFile)
         {
             this.isCollidable = isCollidable;
+            Random random = new Random();
 
 
             //The following represents a list of treausre locations..
             int[,] treasure = {
-                                  {430,400},
-                                  {410,400},
-                                  {420,400},
+                                  { random.Next(384,512),random.Next(384, 512) },
+                                  { random.Next(384,512),random.Next(384, 512) },
+                                  { random.Next(384,512),random.Next(384, 512) },
                                   {447,453},
                               };
 
