@@ -28,10 +28,8 @@ namespace AGMGSKv6
     }
 
     /// <summary>
-    /// This class holds information regarding a lsit of treasure nodes. A treasure
-    /// will be characterized by its location, and whether it has been taken or not.
-    /// Once a treasure has been taken, it is first tagged, and then a visual marker
-    /// should be placed to indicate such.
+    /// TreasureList is a list of TreasureNodes (above) that represent the treasures themselves. They consist of their x & y positions if they are tagged.
+    /// TreasureList generates the locations of 3 treasures randomly, then the one in the wall. It also handles the visual tell (the spin) of tagged treasures.
     /// </summary>
     /// 
     public class TreasureList : Model3D
@@ -96,12 +94,16 @@ namespace AGMGSKv6
                 //If the treasure is not tagged, spin it
                 if (!this.treasureNode[i].isTagged)
                 {
-                    this.instance[i].Yaw = .01f;
+                    this.instance[i].Yaw = 0;
+                    this.instance[i].Pitch = 0;
+                    this.instance[i].Roll = 0;
                     this.instance[i].updateMovableObject();
                 }
                 else
                 {
-                    this.instance[i].Yaw = 0.0f;
+                    this.instance[i].Yaw = .01f;
+                    this.instance[i].Pitch = .01f;
+                    this.instance[i].Roll = .01f;
                     this.instance[i].updateMovableObject();
                 }
 

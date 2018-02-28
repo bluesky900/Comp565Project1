@@ -263,9 +263,9 @@ namespace AGMGSKv9
         // Modify values within 2D array with noise of specified strength multiplier
         public void ApplyNoise(float[,] arr, float Strength, Random rand, Vector2 Mountain)
         {
-            float mountainRadius = 150f / 512f;
-            float weightExp = 16f;
-            float maxWeightNoise = 0.001f;
+            float mountainRadius = 125f / 512f;
+            float weightExp = 8f;
+            float maxWeightNoise = 0.002f;
             double count = Math.Sqrt(arr.Length);
             for (int h = 0; h < count; h++)
             {

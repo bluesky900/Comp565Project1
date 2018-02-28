@@ -107,21 +107,18 @@ namespace AGMGSKv9
             {
                 int x, z;
 
-                //Is this treasure tagged?
+                // If treasure is tagged ignore it and iterate
                 if (this.treasures.getTreasureNode[i].isTagged)
                 {
                     continue;
                 }
 
-                //Else
-                //Load in the position of the treasure
+                // Get Position from treasure and calculate distance
                 x = (int)this.treasures.getTreasureNode[i].x * this.stage.Terrain.Spacing;
                 z = (int)this.treasures.getTreasureNode[i].z * this.stage.Terrain.Spacing;
-
-                //Calculate distance to treasure
                 distance = Vector2.Distance(new Vector2(x, z), new Vector2(thisPosX, thisPosZ));
 
-                //If player is close enough pick up the treasure
+                // Tag treasure if close enough
                 if (distance < (this.stage.Terrain.Spacing * 2))
                 { 
                     this.treasureCount += 1;
