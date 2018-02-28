@@ -49,7 +49,7 @@ namespace AGMGSKv9
         private float angle;
         private Matrix initialOrientation;
 
-        private TreasureList treasreList;
+        private TreasureList treasures;
         private int treasureCount;
 
         public int treasure_count
@@ -71,7 +71,7 @@ namespace AGMGSKv9
             angle = 0.01f;
             initialOrientation = agentObject.Orientation;
 
-            this.treasreList = tl;
+            this.treasures = tl;
             this.treasureCount = 0;
         }
 
@@ -103,30 +103,26 @@ namespace AGMGSKv9
             int thisPosZ = (int)this.instance[0].Translation.Z;
             float distance;
 
-            for (int i = 0; i < treasreList.Instance.Count; i++)
+            for (int i = 0; i < treasures.Instance.Count; i++)
             {
                 int x, z;
 
-                //Is this treasure tagged?
-                if (this.treasreList.getTreasureNode[i].isTagged)
+                // If treasure is tagged ignore it and iterate
+                if (this.treasures.getTreasureNode[i].isTagged)
                 {
                     continue;
                 }
 
-                //Else
-                //Load in the position of the treasure
-                x = (int)this.treasreList.getTreasureNode[i].x * this.stage.Terrain.Spacing;
-                z = (int)this.treasreList.getTreasureNode[i].z * this.stage.Terrain.Spacing;
-
-                //Are we within 300 pixels of the treasure?
+                // Get Position from treasure and calculate distance
+                x = (int)this.treasures.getTreasureNode[i].x * this.stage.Terrain.Spacing;
+                z = (int)this.treasures.getTreasureNode[i].z * this.stage.Terrain.Spacing;
                 distance = Vector2.Distance(new Vector2(x, z), new Vector2(thisPosX, thisPosZ));
 
+                // Tag treasure if close enough
                 if (distance < (this.stage.Terrain.Spacing * 2))
-                {
-                    //We are within range! Collect the treasure and set the treasure as tagged.
+                { 
                     this.treasureCount += 1;
-                    this.treasreList.getTreasureNode[i].isTagged = true;
-
+                    this.treasures.getTreasureNode[i].isTagged = true;
                 }
             }
         }
