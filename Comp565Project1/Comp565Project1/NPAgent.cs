@@ -125,47 +125,45 @@ namespace AGMGSKv9
 
             if (this.treasurePath)
             {
-				if(this.expectedTreasureCount == treasureCount){
-					++expectedTreasureCount;
-					distance = float.MaxValue;
-					for (int i = 0; i < this.treasureList.getTreasureNode.Length; i++)
-						{
-							if (this.treasureList.getTreasureNode[i].isTagged)
-								continue;
-
-							distance2 = Vector2.Distance(new Vector2(agentObject.Translation.X, agentObject.Translation.Z),
-														new Vector2(this.treasureList.getTreasureNode[i].x * this.stage.Spacing, this.treasureList.getTreasureNode[i].z * this.stage.Spacing));
-
-							if (distance2 < distance)
+				if(treasureCount < this.treasureList.getTreasureNode.Length){
+					if(this.expectedTreasureCount == treasureCount){
+						++expectedTreasureCount;
+						distance = float.MaxValue;
+						for (int i = 0; i < this.treasureList.getTreasureNode.Length; i++)
 							{
-								//Make the treasure the new goal
-								this.treasureListNum = i;
-								distance = distance2;
+								if (this.treasureList.getTreasureNode[i].isTagged)
+									continue;
+
+								distance2 = Vector2.Distance(new Vector2(agentObject.Translation.X, agentObject.Translation.Z),
+															new Vector2(this.treasureList.getTreasureNode[i].x * this.stage.Spacing, this.treasureList.getTreasureNode[i].z * this.stage.Spacing));
+
+								if (distance2 < distance)
+								{
+									//Make the treasure the new goal
+									this.treasureListNum = i;
+									distance = distance2;
+								}
 							}
-						}
-						
-					if (distance != float.MaxValue){
-                        this.treasurePath = true;
-                    }
+
+					}
+					//Adjust the facing location towards the treasure goal
+					agentObject.turnToFace(new Vector3(this.treasureList.getTreasureNode[this.treasureListNum].x * this.stage.Terrain.Spacing,
+													   0,
+													   this.treasureList.getTreasureNode[this.treasureListNum].z * this.stage.Terrain.Spacing));
+
+					//Are we within grabbing range?
+					distance = Vector2.Distance(new Vector2(agentObject.Translation.X, agentObject.Translation.Z),
+												new Vector2(this.treasureList.getTreasureNode[this.treasureListNum].x * this.stage.Spacing, this.treasureList.getTreasureNode[this.treasureListNum].z * this.stage.Spacing));
+
+					if (distance < 200.0f){
+						//We are within range! Collect the treasure and set the treasure as tagged.
+						this.treasureCount += 1;
+						this.treasureList.getTreasureNode[this.treasureListNum].isTagged = true;
+
+						//Change path back to normal
+						this.treasurePath = false;
+					}
 				}
-
-                //Adjust the facing location towards the treasure goal
-                agentObject.turnToFace(new Vector3(this.treasureList.getTreasureNode[this.treasureListNum].x * this.stage.Terrain.Spacing,
-                                                   0,
-                                                   this.treasureList.getTreasureNode[this.treasureListNum].z * this.stage.Terrain.Spacing));
-
-                //Are we within grabbing range?
-                distance = Vector2.Distance(new Vector2(agentObject.Translation.X, agentObject.Translation.Z),
-                                            new Vector2(this.treasureList.getTreasureNode[this.treasureListNum].x * this.stage.Spacing, this.treasureList.getTreasureNode[this.treasureListNum].z * this.stage.Spacing));
-
-                if (distance < 200.0f){
-                    //We are within range! Collect the treasure and set the treasure as tagged.
-                    this.treasureCount += 1;
-                    this.treasureList.getTreasureNode[this.treasureListNum].isTagged = true;
-
-                    //Change path back to normal
-                    this.treasurePath = false;
-                }
             }
             else
             {
