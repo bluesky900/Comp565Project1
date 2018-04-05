@@ -17,9 +17,13 @@
  *       the class and semester are specified
  *
  * 
- * Group member:  Mike Barnes
+ * Group members:
+ * Ernest Gaddi   ernest.gaddi.491@my.csun.edu
+ * Joshua Liu     joshua.liu.212@my.csun.edu
+ * Skyler Gentry  skyler.gentry.605@my.csun.edu 
+ * 
  * Project 1
- * Comp 565 Spring 2016
+ * Comp 565 Spring 2018
  */
 
 using System;

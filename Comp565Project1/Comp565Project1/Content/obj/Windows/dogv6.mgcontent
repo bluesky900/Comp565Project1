@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PipelineBuildEvent xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <SourceFile>G:/Skyler/Documents/CSUN/Comp565Project1/Comp565Project1/Comp565Project1/Content/dogv6.3ds</SourceFile>
-  <SourceTime>2018-02-27T17:35:21.2667766-08:00</SourceTime>
+  <SourceTime>2018-04-04T17:17:55.7581371-07:00</SourceTime>
   <DestFile>G:/Skyler/Documents/CSUN/Comp565Project1/Comp565Project1/Comp565Project1/Content/bin/Windows/dogv6.xnb</DestFile>
-  <DestTime>2018-02-27T17:36:36.3844785-08:00</DestTime>
+  <DestTime>2018-04-04T17:18:10.9958324-07:00</DestTime>
   <Importer>OpenAssetImporter</Importer>
   <ImporterTime>2017-03-01T07:05:36-08:00</ImporterTime>
   <Processor>ModelProcessor</Processor>

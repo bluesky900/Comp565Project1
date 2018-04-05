@@ -99,10 +99,15 @@ namespace AGMGSKv9
             first.Name = "npFirst";
             follow.Name = "npFollow";
             above.Name = "npAbove";
+            isCollidable = true;
+            stage.Collidable.Add(agentObject);
 
             this.treasureList = tl;
             this.treasureCount = 0;
             this.treasurePath = false;
+
+            CollisionDetectors detector = new CollisionDetectors(agentObject.Translation);
+
 
             // path is built to work on specific terrain, make from int[x,z] array pathNode
             path = new Path(stage, pathNode, Path.PathType.LOOP); // continuous search path
