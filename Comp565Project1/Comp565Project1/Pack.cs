@@ -25,6 +25,8 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+
+using System.Diagnostics;
 #endregion
 
 namespace AGMGSKv9 {
@@ -37,33 +39,54 @@ namespace AGMGSKv9 {
 /// 
 /// 2/1/2016 last changed
 /// </summary>
-public class Pack : MovableModel3D {   
-   Object3D leader;
+public class Pack : MovableModel3D { 
 
-/// <summary>
-/// Construct a pack with an Object3D leader
-/// </summary>
-/// <param name="theStage"> the scene </param>
-/// <param name="label"> name of pack</param>
-/// <param name="meshFile"> model of a pack instance</param>
-/// <param name="xPos, zPos">  approximate position of the pack </param>
-/// <param name="aLeader"> alpha dog can be used for flock center and alignment </param>
-   public Pack(Stage theStage, string label, string meshFile, int nDogs, int xPos, int zPos, Object3D theLeader)
+    Object3D leader;
+    KeyboardState currentKeyState;
+    KeyboardState  prevKeyState;
+    Inspector inspector;
+    float leaderWeight = 0;
+
+
+    /// <summary>
+    /// Construct a pack with an Object3D leader
+    /// </summary>
+    /// <param name="theStage"> the scene </param>
+    /// <param name="label"> name of pack</param>
+    /// <param name="meshFile"> model of a pack instance</param>
+    /// <param name="xPos, zPos">  approximate position of the pack </param>
+    /// <param name="aLeader"> alpha dog can be used for flock center and alignment </param>
+    public Pack(Stage theStage, string label, string meshFile, int nDogs, int xPos, int zPos, Object3D theLeader, Inspector theInspector)
       : base(theStage, label, meshFile) {
       isCollidable = true;
 		random = new Random();
       leader = theLeader;
 		int spacing = stage.Spacing;
-		// initial vertex offset of dogs around (xPos, zPos)
-		int [,] position = { {0, 0}, {7, -4}, {-5, -2}, {-7, 4}, {5, 2} };
-		for( int i = 0; i < position.GetLength(0); i++) {
-			int x = xPos + position[i, 0];
-			int z = zPos + position[i, 1];
-			float scale = (float)(0.5 + random.NextDouble());
+      // initial vertex offset of dogs around (xPos, zPos)
+      int [,] position = { {0, 0}, {32, -16}, {-28, -8}, {-28, 16}, {20, 8} };
+		for( int i = 0; i < nDogs/*position.GetLength(0)*/; i++) {
+        Debug.WriteLine(nDogs);
+        int x = xPos + random.Next(-128, 128);
+
+      int z = zPos + random.Next(-128, 128);
+
+      float scale = (float)(0.5f + 0.5f * random.NextDouble());
 			addObject( new Vector3(x * spacing, stage.surfaceHeight(x, z), z * spacing),
 						  new Vector3(0, 1, 0), 0.0f,
 						  new Vector3(scale, scale, scale));
 			}
+
+      for ( int i = 0; i < nDogs; i++ )
+      {
+        Vector3 Rando = new Vector3((float)random.NextDouble() - 0.5f, 0, (float)random.NextDouble() - 0.5f);
+        Rando.Normalize();
+        instance[i].turnToFace(instance[i].Translation + Rando);
+      }
+      inspector = theInspector;
+
+      currentKeyState = Keyboard.GetState();
+      prevKeyState = currentKeyState;
+
       }
 
    /// <summary>
@@ -72,19 +95,136 @@ public class Pack : MovableModel3D {
    /// Supports leaderless and leader based "flocking" 
    /// </summary>      
    public override void Update(GameTime gameTime) {
-      // if (leader == null) need to determine "virtual leader from members"
-      float angle = 0.3f;
-      foreach (Object3D obj in instance) {
-         obj.Yaw = 0.0f;
-         // change direction 4 time a second  0.07 = 4/60
-         if ( random.NextDouble() < 0.07) {
+
+      prevKeyState = currentKeyState;
+      currentKeyState = Keyboard.GetState();
+      if ( currentKeyState.IsKeyDown(Keys.U) && !prevKeyState.IsKeyDown(Keys.U) )
+      {
+        if (leaderWeight >=1f) leaderWeight = 0f;
+        else leaderWeight = Math.Min( 1f, leaderWeight + 0.33334f);
+        Debug.WriteLine(leaderWeight);
+      }
+      inspector.setInfo(20, "Leader Weight "+ leaderWeight.ToString() );
+
+
+      random = new Random();
+      /*if (leader == null)
+      {//need to determine "virtual leader from members"
+        float angle = 0.3f;
+        foreach (Object3D obj in instance)
+        {
+          obj.Yaw = 0.0f;
+          // change direction 4 time a second  0.07 = 4/60
+          if (random.NextDouble() < 0.07)
+          {
             if (random.NextDouble() < 0.5) obj.Yaw -= angle; // turn left
-            else  obj.Yaw += angle; // turn right
+            else obj.Yaw += angle; // turn right
+          }
+          obj.updateMovableObject();
+          stage.setSurfaceHeight(obj);
+        }
+      }
+      else
+      {*/
+
+      /* ---- Circle
+      for ( int i = 0; i < instance.Count; i++ )
+        {
+        instance[i].Yaw = 0;
+        if (random.NextDouble() < 10f / 60)
+        {
+          Vector3 Goal = leader.Translation;
+          float Weight = Math.Min(50f / Vector3.Distance(instance[i].Translation, leader.Translation), 1.0f);
+          float Turn = (float)random.NextDouble();
+          Debug.WriteLine(Weight);
+          instance[i].turnToFace(Goal);
+          instance[i].Yaw = Weight * ((( turnSpeed[i] * 2f) - 1f) * 90f);
+        }
+          instance[i].updateMovableObject();
+          stage.setSurfaceHeight(instance[i]);
+        } ---- EndCircle */
+      //}
+
+      for (int i = 0; i < instance.Count; i++)
+      {
+        if (random.NextDouble() < 10f / 60)
+        {
+          Vector3 Here = instance[i].Translation;
+          Vector3 ToLeader = leader.Translation - Here;
+          Vector3 Torwards = new Vector3(instance[i].Forward.X, instance[i].Forward.Y, instance[i].Forward.Z);
+          Torwards.Normalize();
+          ToLeader.Normalize();
+
+          int NearbyCount = 1;
+          Vector3 AveragePosition = Here;
+          Vector3 AverageAlignment = instance[i].Forward;
+          for ( int j = 0; j < instance.Count; j++ )
+          {
+            Vector3 Other = instance[j].Translation;
+            float Distance = Vector3.Distance(Here, Other);
+            if ( Distance < 4000f )
+            {
+              AverageAlignment += instance[j].Forward;
+              AveragePosition += Other;
+              NearbyCount += 1;
+            }      
+          }
+          float DistanceLead = Vector3.Distance(Here, leader.Translation);
+          if ( DistanceLead < 4000f )
+          {
+            AverageAlignment += leader.Forward;
+            AveragePosition += leader.Translation;
+            NearbyCount += 1;
+          }
+
+          AveragePosition /= (float)NearbyCount;
+          AverageAlignment /= (float)NearbyCount;
+          AverageAlignment.Normalize();
+
+          Vector3 ToFlock = AveragePosition - Here;
+          ToFlock.Normalize();
+          Vector3 FromFlock = ToFlock * -1f;
+
+          Vector3 Goal;
+
+          float DistanceAvg = Vector3.Distance(Here, AveragePosition);
+          if (NearbyCount > 2)
+          {
+            if (DistanceAvg < 1000f)
+            {
+              if ( DistanceAvg > 500f)
+              {
+                float CloseWeight = (DistanceAvg - 500f) / 500f;
+                Goal = (1f - CloseWeight) * FromFlock + (CloseWeight * AverageAlignment); 
+              }
+              else Goal = FromFlock;
             }
-         obj.updateMovableObject();
-         stage.setSurfaceHeight(obj);
-         }
-      base.Update(gameTime);  // MovableMesh's Update(); 
+            if (DistanceAvg < 3000f)
+            {
+              if ( DistanceAvg > 2000 )
+              {
+                float FarWeight = (DistanceAvg - 1000f) / 1000f;
+                Goal = (1f - FarWeight) * AverageAlignment + (FarWeight * ToFlock);
+              }
+              else Goal = AverageAlignment;
+            }
+            else Goal = ToFlock;
+          }
+          else Goal = Torwards;
+
+          Goal = Goal * (1.0f - leaderWeight) + ToLeader * leaderWeight;
+          Goal.Normalize();
+
+          Goal = Goal * 0.25f + instance[i].Forward * 0.75f;
+
+          instance[i].turnToFace(Here +Goal);
+        }
+
+        instance[i].updateMovableObject();
+        stage.setSurfaceHeight(instance[i]);
+      }
+
+        base.Update(gameTime);  // MovableMesh's Update(); 
       }
 
 

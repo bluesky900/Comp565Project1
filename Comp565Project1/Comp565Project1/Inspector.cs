@@ -55,12 +55,13 @@ namespace AGMGSKv9 {
 public class Inspector {
    // Display constants
    private const int InfoPaneSize = 5;   // number of lines / info display pane
-   private const int InfoDisplayStrings = 20;  // number of total display strings
+   private const int InfoDisplayStrings = 25;  // number of total display strings
    private const int MatrixBase = 5;
    private const int FirstBase = 10;    // base to offset for display strings
    private const int SecondBase =  15;   // second pane for display strings
-   // Screen Viewport and text fonts and display information variables
-   private Viewport infoViewport;
+    private const int ThirdBase = 20;   // third pane for display strings
+    // Screen Viewport and text fonts and display information variables
+    private Viewport infoViewport;
    private SpriteFont infoFont;
    private Color fontColor;
    private Texture2D infoBackground;
@@ -114,7 +115,7 @@ public class Inspector {
       if (showHelp || showMatrices) 
             showHelp = showMatrices = false;
          else 
-            infoCount = (infoCount + 1) % 2;   
+            infoCount = (infoCount + 1) % 3;   
       }
 
 
@@ -190,6 +191,15 @@ public class Inspector {
             FontOrigin = infoFont.MeasureString(infoString[infoBase + i]);
             spriteBatch.DrawString(infoFont, infoString[infoBase + i], FontPos[i], fontColor); }
          }
+      else if (infoCount == 2)
+      { // show miscellaneous info stings 20...25
+        int infoBase = ThirdBase;
+        for (int i = 0; i < InfoPaneSize; i++)
+        {
+          FontOrigin = infoFont.MeasureString(infoString[infoBase + i]);
+          spriteBatch.DrawString(infoFont, infoString[infoBase + i], FontPos[i], fontColor);
+        }
       }
+    }
    }
  }

@@ -465,7 +465,7 @@ public class Stage : Game {
 		Components.Add(wall);
 		// create a pack for "flocking" algorithms
 		// create a Pack of 6 dogs centered at (450, 500) that is leaderless
-		Pack pack = new Pack(this, "dog", "dogV6", 6, 450, 430, null);
+		Pack pack = new Pack(this, "dog", "dogV6", 50, 256, 256, player.AgentObject, inspector);
 		Components.Add(pack);
       // ----------- OPTIONAL CONTENT HERE -----------------------
       // Load content for your project here
