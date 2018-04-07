@@ -101,6 +101,7 @@ public class Stage : Game {
    // Required entities -- all AGXNASK programs have a Player and Terrain
    protected Player player = null;
    protected NPAgent npAgent = null;
+    protected Sensor sensor = null;
    protected Terrain terrain = null;
    protected List<Object3D> collidable = null;
    // Screen display and other information variables
@@ -454,8 +455,10 @@ public class Stage : Game {
       npAgent = new NPAgent(this, "Evader",
          new Vector3(490 * spacing, terrain.surfaceHeight(490, 450), 450 * spacing),
          new Vector3(0, 1, 0), 0.0f, treasure, "magentaAvatarV6");  // facing +Z
-		npAgent.IsCollidable = false;  // npAgent does not test for collisions
+		  npAgent.IsCollidable = true;  // npAgent does not test for collisions
       Components.Add(npAgent);
+      sensor = new Sensor(this, "Sensor", "sensorSphere", false, npAgent.Instance[0], inspector);
+      Components.Add(sensor);
 		// create file output stream for trace()
 		fout = new StreamWriter("trace.txt", false);
 		Trace = string.Format("{0} trace output from AGMGSKv8", DateTime.Today.ToString("MMMM dd, yyyy"));  

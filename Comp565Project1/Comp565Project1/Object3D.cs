@@ -181,6 +181,11 @@ public class Object3D  {
       pitch = roll = yaw = 0;
       step = 0;
       }
+    public bool collided
+    {
+      get { return collision(Translation); }
+      set { }
+    }
 
    // Methods
 
