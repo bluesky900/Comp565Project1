@@ -28,3 +28,4 @@ G:\Skyler\Documents\CSUN\Comp565Project1\Comp565Project1\Comp565Project1\bin\Win
 G:\Skyler\Documents\CSUN\Comp565Project1\Comp565Project1\Comp565Project1\bin\Windows\x86\Debug\Content\dogv6.xnb
 G:\Skyler\Documents\CSUN\Comp565Project1\Comp565Project1\Comp565Project1\bin\Windows\x86\Debug\Content\magentaAvatarV6.xnb
 G:\Skyler\Documents\CSUN\Comp565Project1\Comp565Project1\Comp565Project1\bin\Windows\x86\Debug\Content\redAvatarV6.xnb
+G:\Skyler\Documents\CSUN\Comp565Project1\Comp565Project1\Comp565Project1\bin\Windows\x86\Debug\Content\sensorSphere.xnb

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PipelineBuildEvent xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <SourceFile>G:/Skyler/Documents/CSUN/Comp565Project1/Comp565Project1/Comp565Project1/Content/redAvatarV6.3ds</SourceFile>
-  <SourceTime>2018-04-04T17:17:55.820644-07:00</SourceTime>
-  <DestFile>G:/Skyler/Documents/CSUN/Comp565Project1/Comp565Project1/Comp565Project1/Content/bin/Windows/redAvatarV6.xnb</DestFile>
-  <DestTime>2018-04-07T15:57:34.5874078-07:00</DestTime>
+  <SourceFile>G:/Skyler/Documents/CSUN/Comp565Project1/Comp565Project1/Comp565Project1/Content/sensorSphere.3ds</SourceFile>
+  <SourceTime>2018-04-07T15:57:04.9882592-07:00</SourceTime>
+  <DestFile>G:/Skyler/Documents/CSUN/Comp565Project1/Comp565Project1/Comp565Project1/Content/bin/Windows/sensorSphere.xnb</DestFile>
+  <DestTime>2018-04-07T15:57:34.6342876-07:00</DestTime>
   <Importer>OpenAssetImporter</Importer>
   <ImporterTime>2017-03-01T07:05:36-08:00</ImporterTime>
   <Processor>ModelProcessor</Processor>
@@ -54,7 +54,7 @@
   </Parameters>
   <Parameters>
     <Key>Scale</Key>
-    <Value>50</Value>
+    <Value>150</Value>
   </Parameters>
   <Parameters>
     <Key>SwapWindingOrder</Key>
