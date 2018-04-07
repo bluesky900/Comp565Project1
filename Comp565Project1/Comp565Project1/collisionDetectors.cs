@@ -11,15 +11,34 @@ using AGMGSKv6;
 
 namespace AGMGSKv9
 {
-    class CollisionDetectors
+    class CollisionDetectors : MovableModel3D
     {
         BoundingSphere boundingSphere;
+        NPAgent parent;
+        Object3D temp;
+        int rotate = 0;
 
-        public CollisionDetectors(Vector3 parentPosition)
-        {
-            boundingSphere = new BoundingSphere(parentPosition, 10f);
+        public CollisionDetectors(Stage theStage, string label, string meshFile, Vector3 position, NPAgent inParent)  
+	    : base(theStage, label, meshFile) 
+	    {
+            parent = inParent;
+            temp = addObject(position + new Vector3(800f, 0f, 0f), Vector3.Up, 0f);
+            stage.Collidable.Add(temp);
         }
 
+        public override void Update(GameTime gameTime)
+        {
+            move(parent);
+        }
 
+        public void move(NPAgent position)
+        {
+            foreach (Object3D obj in instance)
+            {
+                rotate++;
+                obj.Yaw = rotate * .01f;
+                obj.Translation = position.AgentObject.Translation + new Vector3(800f, 0f, 0f);
+            }
+        }
     }
 }

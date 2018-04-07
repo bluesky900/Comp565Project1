@@ -457,8 +457,9 @@ public class Stage : Game {
 		npAgent.IsCollidable = true;  // npAgent does not test for collisions
       Components.Add(npAgent);
 
-      CollisionDetectors detector = new CollisionDetectors(new Vector3(510 * spacing, terrain.surfaceHeight(510, 507), 507 * spacing));
-            //Components.Add(detector);
+      CollisionDetectors detector = new CollisionDetectors(this, "wall", "100x100x100Brick", npAgent.AgentObject.Translation, npAgent);
+            detector.IsCollidable = true;
+      Components.Add(detector);
 
         // create file output stream for trace()
         fout = new StreamWriter("trace.txt", false);

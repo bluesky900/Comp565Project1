@@ -106,8 +106,6 @@ namespace AGMGSKv9
             this.treasureCount = 0;
             this.treasurePath = false;
 
-            CollisionDetectors detector = new CollisionDetectors(agentObject.Translation);
-
 
             // path is built to work on specific terrain, make from int[x,z] array pathNode
             path = new Path(stage, pathNode, Path.PathType.LOOP); // continuous search path
