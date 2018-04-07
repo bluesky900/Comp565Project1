@@ -101,6 +101,8 @@ namespace AGMGSKv9
             follow.Name = "npFollow";
             above.Name = "npAbove";
 
+            stage.Collidable.Add(agentObject);
+
             this.treasureList = tl;
             this.treasureCount = 0;
             this.treasurePath = false;
@@ -126,8 +128,20 @@ namespace AGMGSKv9
             float distance; //distance from goal
             float tagDistance = 200f; //minimum distance from treasure to tag it
 
-      // if currently seeking treasure
-      if (this.treasurePath)
+            for (int i = 0; i < this.treasureList.getTreasureNode.Length; i++)
+            {
+                if (Vector2.Distance(new Vector2(agentObject.Translation.X, agentObject.Translation.Z), new Vector2(this.treasureList.getTreasureNode[i].x * this.stage.Spacing, this.treasureList.getTreasureNode[i].z * this.stage.Spacing)) < 4000f)
+                {
+                    this.treasurePath = true;
+                }
+                else
+                {
+                    this.treasurePath = false;
+                }
+            }
+
+                // if currently seeking treasure
+                if (this.treasurePath)
       {
         if (treasureCount < this.treasureList.getTreasureNode.Length)
         {
