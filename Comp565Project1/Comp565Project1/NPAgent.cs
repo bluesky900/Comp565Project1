@@ -49,6 +49,7 @@ namespace AGMGSKv9
         private Path path;
         private int snapDistance = 20;  // this should be a function of step and stepSize
     private BoundingSphere leftSphere;
+        Inspector inspector;
 
         //Pointer to the treasure list
         private TreasureList treasureList;
@@ -94,14 +95,15 @@ namespace AGMGSKv9
         /// <param name="radians"> initial rotation</param>
         /// <param name="meshFile"> Direct X *.x Model in Contents directory </param>
         public NPAgent(Stage theStage, string label, Vector3 pos, Vector3 orientAxis,
-           float radians, TreasureList tl, string meshFile)
+           float radians, TreasureList tl, string meshFile, Inspector theInspector)
            : base(theStage, label, pos, orientAxis, radians, meshFile)
         {  // change names for on-screen display of current camera
             first.Name = "npFirst";
             follow.Name = "npFollow";
             above.Name = "npAbove";
+            inspector = theInspector;
 
-            stage.Collidable.Add(agentObject);
+            //stage.Collidable.Add(agentObject);
 
             this.treasureList = tl;
             this.treasureCount = 0;
@@ -127,16 +129,12 @@ namespace AGMGSKv9
         {
             float distance; //distance from goal
             float tagDistance = 200f; //minimum distance from treasure to tag it
-
+            inspector.setInfo(22, "Treasures collected: " + treasureCount.ToString());
             for (int i = 0; i < this.treasureList.getTreasureNode.Length; i++)
             {
-                if (Vector2.Distance(new Vector2(agentObject.Translation.X, agentObject.Translation.Z), new Vector2(this.treasureList.getTreasureNode[i].x * this.stage.Spacing, this.treasureList.getTreasureNode[i].z * this.stage.Spacing)) < 4000f)
+                if (Vector2.Distance(new Vector2(agentObject.Translation.X, agentObject.Translation.Z), new Vector2(this.treasureList.getTreasureNode[i].x * this.stage.Spacing, this.treasureList.getTreasureNode[i].z * this.stage.Spacing)) < 4000f && this.treasureList.getTreasureNode[i].isTagged == false)
                 {
                     this.treasurePath = true;
-                }
-                else
-                {
-                    this.treasurePath = false;
                 }
             }
 

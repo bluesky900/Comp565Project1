@@ -454,7 +454,7 @@ public class Stage : Game {
       Components.Add(player);
       npAgent = new NPAgent(this, "Evader",
          new Vector3(490 * spacing, terrain.surfaceHeight(490, 450), 450 * spacing),
-         new Vector3(0, 1, 0), 0.0f, treasure, "magentaAvatarV6");  // facing +Z
+         new Vector3(0, 1, 0), 0.0f, treasure, "magentaAvatarV6", inspector);  // facing +Z
 		  npAgent.IsCollidable = true;  // npAgent does not test for collisions
       Components.Add(npAgent);
       sensor = new Sensor(this, "Sensor", "sensorSphere", false, npAgent.Instance[0], inspector);
