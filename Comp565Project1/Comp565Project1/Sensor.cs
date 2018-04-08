@@ -46,7 +46,6 @@ namespace AGMGSKv6
         rightSphere.Translation = Position + parent.Left * -150f;
       leftleftSphere.Translation = parent.Translation + parent.Forward * 100f + parent.Left* 280f;
       rightrightSphere.Translation = parent.Translation + parent.Forward * 100f + parent.Left * -280f;
-      string output = "NOT COLLIDING";
         parent.Yaw = 0;
         if (leftSphere.collided)
         {
@@ -57,7 +56,6 @@ namespace AGMGSKv6
         else if (rightSphere.collided) parent.Yaw += 0.2f;
       if (leftleftSphere.collided) parent.Yaw -= 0.05f;
       if (rightrightSphere.collided) parent.Yaw += 0.05f;
-      inspector.setInfo(21, output); 
 
       base.Update(gameTime);
     }

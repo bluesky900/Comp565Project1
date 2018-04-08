@@ -33,49 +33,53 @@ using AGMGSKv6;
 namespace AGMGSKv9
 {
 
-    /// <summary>
-    /// A non-playing character that moves.  Override the inherited Update(GameTime)
-    /// to implement a movement (strategy?) algorithm.
-    /// Distribution NPAgent moves along an "exploration" path that is created by the
-    /// from int[,] pathNode array.  The exploration path is traversed in a reverse path loop.
-    /// Paths can also be specified in text files of Vector3 values, see alternate
-    /// Path class constructors.
-    /// 
-    /// 1/20/2016 last changed
-    /// </summary>
-    public class NPAgent : Agent
-    {
-        private NavNode nextGoal;
-        private Path path;
-        private int snapDistance = 20;  // this should be a function of step and stepSize
+  /// <summary>
+  /// A non-playing character that moves.  Override the inherited Update(GameTime)
+  /// to implement a movement (strategy?) algorithm.
+  /// Distribution NPAgent moves along an "exploration" path that is created by the
+  /// from int[,] pathNode array.  The exploration path is traversed in a reverse path loop.
+  /// Paths can also be specified in text files of Vector3 values, see alternate
+  /// Path class constructors.
+  /// 
+  /// 1/20/2016 last changed
+  /// </summary>
+  public class NPAgent : Agent
+  {
+    private NavNode nextGoal;
+    private Path path;
+    private int snapDistance = 20;  // this should be a function of step and stepSize
     private BoundingSphere leftSphere;
-        Inspector inspector;
+    Inspector inspector;
 
-        //Pointer to the treasure list
-        private TreasureList treasureList;
-        //Treasure goal
-        private int treasureListNum;
-        //Treasure Count
-        private int treasureCount;
-        //Treasure Goal boolean
-        private bool treasurePath;
-		private int expectedTreasureCount;
+    //Pointer to the treasure list
+    private TreasureList treasureList;
+    //Treasure goal
+    private int treasureListNum;
+    //Treasure Count
+    private int treasureCount;
+    //Treasure Goal boolean
+    private bool treasurePath;
+    private int expectedTreasureCount;
+    private float stateTime = 0;
 
-        public int treasure_count
-        {
-            get { return this.treasureCount; }
-            set { this.treasureCount = value; }
-        }
+    public int treasure_count
+    {
+      get { return this.treasureCount; }
+      set { this.treasureCount = value; }
+    }
 
-		public bool treasureSearch{
-			get { return this.treasurePath;}
-			set { this.treasurePath = value;
-				  this.expectedTreasureCount = treasureCount;
-				}
-		}
-		
-        // If using makePath(int[,]) set WayPoint (x, z) vertex positions in the following array
-        private int[,] pathNode = { {505, 490}, {500, 500}, {490, 505},  // bottom, right
+    public bool treasureSearch
+    {
+      get { return this.treasurePath; }
+      set
+      {
+        this.treasurePath = value;
+        this.expectedTreasureCount = treasureCount;
+      }
+    }
+
+    // If using makePath(int[,]) set WayPoint (x, z) vertex positions in the following array
+    private int[,] pathNode = { {505, 490}, {500, 500}, {490, 505},  // bottom, right
 										 {435, 505}, {425, 500}, {420, 490},  // bottom, middle
 										 {420, 450}, {425, 440}, {435, 435},  // middle, middle
                                {490, 435}, {500, 430}, {505, 420},  // middle, right
@@ -84,62 +88,67 @@ namespace AGMGSKv9
 										 { 95, 480}, {100, 490}, {110, 495},  // bottom, left
 										 {495, 480} };                                // loop return
 
-        /// <summary>
-        /// Create a NPC. 
-        /// AGXNASK distribution has npAgent move following a Path.
-        /// </summary>
-        /// <param name="theStage"> the world</param>
-        /// <param name="label"> name of </param>
-        /// <param name="pos"> initial position </param>
-        /// <param name="orientAxis"> initial rotation axis</param>
-        /// <param name="radians"> initial rotation</param>
-        /// <param name="meshFile"> Direct X *.x Model in Contents directory </param>
-        public NPAgent(Stage theStage, string label, Vector3 pos, Vector3 orientAxis,
-           float radians, TreasureList tl, string meshFile, Inspector theInspector)
-           : base(theStage, label, pos, orientAxis, radians, meshFile)
-        {  // change names for on-screen display of current camera
-            first.Name = "npFirst";
-            follow.Name = "npFollow";
-            above.Name = "npAbove";
-            inspector = theInspector;
+    /// <summary>
+    /// Create a NPC. 
+    /// AGXNASK distribution has npAgent move following a Path.
+    /// </summary>
+    /// <param name="theStage"> the world</param>
+    /// <param name="label"> name of </param>
+    /// <param name="pos"> initial position </param>
+    /// <param name="orientAxis"> initial rotation axis</param>
+    /// <param name="radians"> initial rotation</param>
+    /// <param name="meshFile"> Direct X *.x Model in Contents directory </param>
+    public NPAgent(Stage theStage, string label, Vector3 pos, Vector3 orientAxis,
+       float radians, TreasureList tl, string meshFile, Inspector theInspector)
+       : base(theStage, label, pos, orientAxis, radians, meshFile)
+    {  // change names for on-screen display of current camera
+      first.Name = "npFirst";
+      follow.Name = "npFollow";
+      above.Name = "npAbove";
+      inspector = theInspector;
 
-            //stage.Collidable.Add(agentObject);
+      //stage.Collidable.Add(agentObject);
 
-            this.treasureList = tl;
-            this.treasureCount = 0;
-            this.treasurePath = false;
+      this.treasureList = tl;
+      this.treasureCount = 0;
+      this.treasurePath = false;
 
-            leftSphere = new BoundingSphere(instance[0].Translation, 200f);
+      leftSphere = new BoundingSphere(instance[0].Translation, 200f);
 
-            // path is built to work on specific terrain, make from int[x,z] array pathNode
-            path = new Path(stage, pathNode, Path.PathType.LOOP); // continuous search path
-            stage.Components.Add(path);
-            nextGoal = path.NextNode;  // get first path goal
-            agentObject.turnTowards(nextGoal.Translation);  // orient towards the first path goal
-                                                           // set snapDistance to be a little larger than step * stepSize
-            snapDistance = (int)(1.5 * (agentObject.Step * agentObject.StepSize));
-        }
+      // path is built to work on specific terrain, make from int[x,z] array pathNode
+      path = new Path(stage, pathNode, Path.PathType.LOOP); // continuous search path
+      stage.Components.Add(path);
+      nextGoal = path.NextNode;  // get first path goal
+      agentObject.turnTowards(nextGoal.Translation);  // orient towards the first path goal
+                                                      // set snapDistance to be a little larger than step * stepSize
+      snapDistance = (int)(1.5 * (agentObject.Step * agentObject.StepSize));
+    }
 
-        /// <summary>
-        /// Simple path following.  If within "snap distance" of a the nextGoal (a NavNode) 
-        /// move to the NavNode, get a new nextGoal, turnToFace() that goal.  Otherwise 
-        /// continue making steps towards the nextGoal.
-        /// </summary>
-        public override void Update(GameTime gameTime)
+    /// <summary>
+    /// Simple path following.  If within "snap distance" of a the nextGoal (a NavNode) 
+    /// move to the NavNode, get a new nextGoal, turnToFace() that goal.  Otherwise 
+    /// continue making steps towards the nextGoal.
+    /// </summary>
+    public override void Update(GameTime gameTime)
+    {
+      float distance; //distance from goal
+      float tagDistance = 200f; //minimum distance from treasure to tag it
+      inspector.setInfo(22, "NPAgent Treasures collected: " + treasureCount.ToString());
+      inspector.setInfo(23, "NPAgent Treasure Hunt? " + treasurePath +", Time: " + stateTime);
+      for (int i = 0; i < this.treasureList.getTreasureNode.Length; i++)
+      {
+        if (Vector2.Distance(new Vector2(agentObject.Translation.X, agentObject.Translation.Z), new Vector2(this.treasureList.getTreasureNode[i].x * this.stage.Spacing, this.treasureList.getTreasureNode[i].z * this.stage.Spacing)) < 4000f && this.treasureList.getTreasureNode[i].isTagged == false)
         {
-            float distance; //distance from goal
-            float tagDistance = 200f; //minimum distance from treasure to tag it
-            inspector.setInfo(22, "Treasures collected: " + treasureCount.ToString());
-            for (int i = 0; i < this.treasureList.getTreasureNode.Length; i++)
-            {
-                if (Vector2.Distance(new Vector2(agentObject.Translation.X, agentObject.Translation.Z), new Vector2(this.treasureList.getTreasureNode[i].x * this.stage.Spacing, this.treasureList.getTreasureNode[i].z * this.stage.Spacing)) < 4000f && this.treasureList.getTreasureNode[i].isTagged == false)
-                {
-                    this.treasurePath = true;
-                }
-            }
+          if (!this.treasurePath)
+          {
+            stateTime = 0;
+            this.treasurePath = true;
+          }
+        }
+      }
 
-                // if currently seeking treasure
-                if (this.treasurePath)
+      // if currently seeking treasure
+      if (this.treasurePath)
       {
         if (treasureCount < this.treasureList.getTreasureNode.Length)
         {
@@ -163,8 +172,18 @@ namespace AGMGSKv9
             }
           }
 
+          if ( this.treasureList.getTreasureNode[this.treasureListNum].isTagged )
+          {
+            this.treasurePath = false;
+            stateTime = 0;
+          }
+
+          int turnAngle;
+          if (stateTime > 10) turnAngle = 5;
+          else turnAngle = 2;
           //Orient agent towards the treasure then get distance to treasure
-          agentObject.turnTowards(new Vector3(this.treasureList.getTreasureNode[this.treasureListNum].x * this.stage.Terrain.Spacing, 0, this.treasureList.getTreasureNode[this.treasureListNum].z * this.stage.Terrain.Spacing));
+          for ( int i = 0; i< turnAngle; i++ )
+            agentObject.turnTowards(new Vector3(this.treasureList.getTreasureNode[this.treasureListNum].x * this.stage.Terrain.Spacing, 0, this.treasureList.getTreasureNode[this.treasureListNum].z * this.stage.Terrain.Spacing));
           distance = Vector2.Distance(new Vector2(agentObject.Translation.X, agentObject.Translation.Z), new Vector2(this.treasureList.getTreasureNode[this.treasureListNum].x * this.stage.Spacing, this.treasureList.getTreasureNode[this.treasureListNum].z * this.stage.Spacing));
 
           // if we are within distance from the treasure, increment count, tag treasure, and return to waypoint navigation
@@ -173,33 +192,50 @@ namespace AGMGSKv9
             this.treasureCount += 1;
             this.treasureList.getTreasureNode[this.treasureListNum].isTagged = true;
             this.treasurePath = false;
+            stateTime = 0;
           }
         } //endif treasurecount < node length
-        else this.treasurePath = false;
+        else
+        {
+          stateTime = 0;
+          this.treasurePath = false;
+        }
       }
       else
       {
-        for (int i = 0; i < 3; i++) { 
-         agentObject.turnTowards(nextGoal.Translation);
+        int turnAngle;
+        if (stateTime > 10) turnAngle = 15;
+        else turnAngle = 3;
+        for (int i = 0; i < turnAngle; i++)
+        {
+          agentObject.turnTowards(nextGoal.Translation);
         }
         // adjust to face nextGoal every move
-                                                               // agentObject.turnTowards(nextGoal.Translation);
-                                                               // See if at or close to nextGoal, distance measured in 2D xz plane
-                distance = Vector3.Distance( new Vector3(nextGoal.Translation.X, 0, nextGoal.Translation.Z), new Vector3(agentObject.Translation.X, 0, agentObject.Translation.Z));
-                stage.setInfo(15, stage.agentLocation(this));
-                stage.setInfo(16,
-                      string.Format("          nextGoal ({0:f0}, {1:f0}, {2:f0})  distance to next goal = {3,5:f2})",
-                          nextGoal.Translation.X / stage.Spacing, nextGoal.Translation.Y, nextGoal.Translation.Z / stage.Spacing, distance));
-                if (distance <= snapDistance)
-                {
-                    // snap to nextGoal and orient toward the new nextGoal 
-                    nextGoal = path.NextNode;
-                    // agentObject.turnToFace(nextGoal.Translation);
-                }
-            }
-
-
-			base.Update(gameTime);  // Agent's Update();
+        // agentObject.turnTowards(nextGoal.Translation);
+        // See if at or close to nextGoal, distance measured in 2D xz plane
+        distance = Vector3.Distance(new Vector3(nextGoal.Translation.X, 0, nextGoal.Translation.Z), new Vector3(agentObject.Translation.X, 0, agentObject.Translation.Z));
+        stage.setInfo(15, stage.agentLocation(this));
+        stage.setInfo(16,
+              string.Format("          nextGoal ({0:f0}, {1:f0}, {2:f0})  distance to next goal = {3,5:f2})",
+                  nextGoal.Translation.X / stage.Spacing, nextGoal.Translation.Y, nextGoal.Translation.Z / stage.Spacing, distance));
+        if (distance <= snapDistance)
+        {
+          // snap to nextGoal and orient toward the new nextGoal 
+          nextGoal = path.NextNode;
+          stateTime = 0;
+          // agentObject.turnToFace(nextGoal.Translation);
         }
+        bool keepGoing = false;
+        for ( int i = 0; i < treasureList.getTreasureNode.Length; i++ )
+        {
+          if (!treasureList.getTreasureNode[i].isTagged) keepGoing = true;
+        }
+        if (!keepGoing) instance[0].StepSize = 0;
+        else instance[0].StepSize = 10;
+      }
+
+      stateTime += (float)gameTime.ElapsedGameTime.Milliseconds/1000f;
+      base.Update(gameTime);  // Agent's Update();
     }
+  }
 }

@@ -449,7 +449,7 @@ public class Stage : Game {
       // Load Agent mesh objects, meshes do not have textures
       player = new Player(this, "Chaser",
          new Vector3(510 * spacing, terrain.surfaceHeight(510, 507), 507 * spacing),
-         new Vector3(0, 1, 0), 0.78f, treasure, "redAvatarV6");  // face looking diagonally across stage
+         new Vector3(0, 1, 0), 0.78f, treasure, "redAvatarV6", inspector);  // face looking diagonally across stage
       player.IsCollidable = true; // test collisions for player
       Components.Add(player);
       npAgent = new NPAgent(this, "Evader",

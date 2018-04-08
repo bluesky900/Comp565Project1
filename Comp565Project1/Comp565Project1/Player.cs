@@ -48,6 +48,7 @@ namespace AGMGSKv9
         private int rotate;
         private float angle;
         private Matrix initialOrientation;
+    private Inspector inspector;
 
         private TreasureList treasures;
         private int treasureCount;
@@ -59,7 +60,7 @@ namespace AGMGSKv9
         }
 
         public Player(Stage theStage, string label, Vector3 pos, Vector3 orientAxis,
-        float radians, TreasureList tl, string meshFile)
+        float radians, TreasureList tl, string meshFile, Inspector theInspector = null )
         : base(theStage, label, pos, orientAxis, radians, meshFile)
         {  // change names for on-screen display of current camera
             first.Name = "First";
@@ -70,6 +71,7 @@ namespace AGMGSKv9
             rotate = 0;
             angle = 0.01f;
             initialOrientation = agentObject.Orientation;
+      inspector = theInspector;
 
             this.treasures = tl;
             this.treasureCount = 0;
@@ -97,6 +99,7 @@ namespace AGMGSKv9
             agentObject.Yaw = rotate * angle;
             base.Update(gameTime);
             rotate = agentObject.Step = 0;
+            inspector.setInfo(21, "Player Treasures Collected: " + treasureCount);
 
             //Treasure Collision: Have we come within 300 pixels of an untagged treasure?
             int thisPosX = (int)this.instance[0].Translation.X;
