@@ -3,4 +3,4 @@
 00:00:00:000  |  	   10 components
 00:00:00:000  |  	  126 collidable objects
 00:00:00:000  |  	    7 cameras
-00:00:20:712  |  system exit
+00:00:15:614  |  system exit

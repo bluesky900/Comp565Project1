@@ -27,7 +27,7 @@ namespace AGMGSKv6
     {
         this.isCollidable = isCollidable;
       inspector = theInspector;
-      float scale = 2.5f;
+      float scale = 1.6f;
         addObject(theParent.Translation, theParent.Forward, 0f, new Vector3( scale,scale,scale) );
         addObject(theParent.Translation, theParent.Forward, 0f, new Vector3(scale, scale, scale));
       addObject(theParent.Translation, theParent.Forward, 0f, new Vector3(scale, scale, scale));
@@ -41,22 +41,22 @@ namespace AGMGSKv6
       rightSphere = instance[1];
       Object3D leftleftSphere = instance[2];
       Object3D rightrightSphere = instance[3];
-        Vector3 Position = parent.Translation + parent.Forward*500;
+        Vector3 Position = parent.Translation + parent.Forward*400;
         leftSphere.Translation = Position + parent.Left * 150f;
         rightSphere.Translation = Position + parent.Left * -150f;
-      leftleftSphere.Translation = parent.Translation + parent.Forward * 250f + parent.Left* 250f;
-      rightrightSphere.Translation = parent.Translation + parent.Forward * 250f + parent.Left * -250f;
+      leftleftSphere.Translation = parent.Translation + parent.Forward * 100f + parent.Left* 280f;
+      rightrightSphere.Translation = parent.Translation + parent.Forward * 100f + parent.Left * -280f;
       string output = "NOT COLLIDING";
         parent.Yaw = 0;
         if (leftSphere.collided)
         {
-          if ( rightSphere.collided) parent.Yaw += 0.1f;
-          else parent.Yaw -= 0.1f;
+          if ( rightSphere.collided) parent.Yaw += 0.2f;
+          else parent.Yaw -= 0.2f;
 
         }
-        else if (rightSphere.collided) parent.Yaw += 0.1f;
-      if (leftleftSphere.collided) parent.Yaw -= 0.03f;
-      if (rightrightSphere.collided) parent.Yaw += 0.03f;
+        else if (rightSphere.collided) parent.Yaw += 0.2f;
+      if (leftleftSphere.collided) parent.Yaw -= 0.05f;
+      if (rightrightSphere.collided) parent.Yaw += 0.05f;
       inspector.setInfo(21, output); 
 
       base.Update(gameTime);
