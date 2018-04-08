@@ -179,7 +179,7 @@ namespace AGMGSKv9
           }
 
           int turnAngle;
-          if (stateTime > 10) turnAngle = 5;
+          if (stateTime > 10) turnAngle = 3;
           else turnAngle = 2;
           //Orient agent towards the treasure then get distance to treasure
           for ( int i = 0; i< turnAngle; i++ )
@@ -204,7 +204,7 @@ namespace AGMGSKv9
       else
       {
         int turnAngle;
-        if (stateTime > 10) turnAngle = 15;
+        if (stateTime > 10) turnAngle = 5;
         else turnAngle = 3;
         for (int i = 0; i < turnAngle; i++)
         {
