@@ -183,6 +183,7 @@ public class Object3D  {
       }
     public bool collided
     {
+      //Checks if collision occured
       get { return collision(Translation); }
       set { }
     }

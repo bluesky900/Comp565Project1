@@ -23,6 +23,7 @@
 using System;
 using System.IO;  // needed for trace()'s fout
 using System.Collections.Generic;
+using System.Diagnostics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -56,10 +57,17 @@ public class Path : DrawableGameComponent {
    public Path(Stage theStage, List<NavNode> aPath, PathType aPathType) : base(theStage) {
       node = aPath;
       nextNode = 0;
-      pathType = aPathType;
       stage = theStage;
       done = false;
+      Random random = new Random();
+      if (random.NextDouble() < 0.5)
+      {
+        pathType = PathType.REVERSE;
+        node.Reverse();
+
       }
+      else pathType = PathType.LOOP;
+    }
 
 	/// <summary>
 	/// Create a path from array
@@ -71,8 +79,7 @@ public class Path : DrawableGameComponent {
 	public Path(Stage theStage, int[,] pathNode, PathType aPathType)
 		: base(theStage)	{
 		nextNode = 0;
-		pathType = aPathType;
-		stage = theStage;
+      stage = theStage;
 		done = false;
       int spacing = stage.Spacing;
 		int x, z;
@@ -84,7 +91,16 @@ public class Path : DrawableGameComponent {
 			node.Add(new NavNode(new Vector3(x * spacing, stage.Terrain.surfaceHeight(x, z), z * spacing),
                NavNode.NavNodeEnum.WAYPOINT) ); 
 			}
-		}
+      Random random = new Random();
+      if (random.NextDouble() < 0.5)
+      {
+        pathType = PathType.REVERSE;
+        node.Reverse();
+
+      }
+      else pathType = PathType.LOOP;
+      Debug.WriteLine(pathType); //Randomly determines path type
+    }
 
 
    /// <summary>
@@ -98,7 +114,6 @@ public class Path : DrawableGameComponent {
       node = new List<NavNode>();
       stage = theStage;
       nextNode = 0;
-      pathType = aPathType;
       done = false;
 		// read file for WayPoint vertex (x,z) positions
 		int spacing = stage.Spacing;
@@ -116,7 +131,15 @@ public class Path : DrawableGameComponent {
             line = fileIn.ReadLine();
             } while (line != null);
          }
+      Random random = new Random();
+      if (random.NextDouble() < 0.5)
+      {
+        pathType = PathType.REVERSE;
+        node.Reverse();
+
       }
+      else pathType = PathType.LOOP;
+    }
 
    // Properties
 
@@ -134,15 +157,8 @@ public class Path : DrawableGameComponent {
             n = node[nextNode];
             nextNode++; }
          // at end of current path, decide what to do:  stop, reverse path, loop?
-         else if (node.Count-1 == nextNode &&  pathType == PathType.SINGLE) {
-               n = node[nextNode];
-               done = true; }  
-            else if (node.Count -1 == nextNode && pathType == PathType.REVERSE) {
-               node.Reverse();
-               nextNode = 0;  // set to next node
-               n = node[nextNode];
-               nextNode++; }
-            else if (node.Count - 1 == nextNode && pathType == PathType.LOOP) {
+         // loop enforced, reverse now tells direction of path rather than what to do when it gets to the end
+         else if (node.Count - 1 == nextNode) {
                n = node[nextNode]; 
                nextNode = 0; }    
          return n; }

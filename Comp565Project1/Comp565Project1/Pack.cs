@@ -77,7 +77,7 @@ public class Pack : MovableModel3D {
 			}
 
       for ( int i = 0; i < nDogs; i++ )
-      {
+      { //randomize Dog positions
         Vector3 Rando = new Vector3((float)random.NextDouble() - 0.5f, 0, (float)random.NextDouble() - 0.5f);
         Rando.Normalize();
         instance[i].turnToFace(instance[i].Translation + Rando);
@@ -96,6 +96,7 @@ public class Pack : MovableModel3D {
    /// </summary>      
    public override void Update(GameTime gameTime) {
 
+      //Check buttons for changing leader weight and display in inspector
       prevKeyState = currentKeyState;
       currentKeyState = Keyboard.GetState();
       if ( currentKeyState.IsKeyDown(Keys.U) && !prevKeyState.IsKeyDown(Keys.U) )
@@ -108,58 +109,27 @@ public class Pack : MovableModel3D {
 
 
       random = new Random();
-      /*if (leader == null)
-      {//need to determine "virtual leader from members"
-        float angle = 0.3f;
-        foreach (Object3D obj in instance)
-        {
-          obj.Yaw = 0.0f;
-          // change direction 4 time a second  0.07 = 4/60
-          if (random.NextDouble() < 0.07)
-          {
-            if (random.NextDouble() < 0.5) obj.Yaw -= angle; // turn left
-            else obj.Yaw += angle; // turn right
-          }
-          obj.updateMovableObject();
-          stage.setSurfaceHeight(obj);
-        }
-      }
-      else
-      {*/
 
-      /* ---- Circle
-      for ( int i = 0; i < instance.Count; i++ )
-        {
-        instance[i].Yaw = 0;
-        if (random.NextDouble() < 10f / 60)
-        {
-          Vector3 Goal = leader.Translation;
-          float Weight = Math.Min(50f / Vector3.Distance(instance[i].Translation, leader.Translation), 1.0f);
-          float Turn = (float)random.NextDouble();
-          Debug.WriteLine(Weight);
-          instance[i].turnToFace(Goal);
-          instance[i].Yaw = Weight * ((( turnSpeed[i] * 2f) - 1f) * 90f);
-        }
-          instance[i].updateMovableObject();
-          stage.setSurfaceHeight(instance[i]);
-        } ---- EndCircle */
-      //}
-
+      //For every member of the pack
       for (int i = 0; i < instance.Count; i++)
       {
-        if (random.NextDouble() < 10f / 60)
+        if (random.NextDouble() < 10f / 60) //every 10 frames do alter the direction
         {
+          //Get current relevant positions and directions
           Vector3 Here = instance[i].Translation;
           Vector3 ToLeader = leader.Translation - Here;
           Vector3 Torwards = new Vector3(instance[i].Forward.X, instance[i].Forward.Y, instance[i].Forward.Z);
+          //Normalize for correct weighting
           Torwards.Normalize();
           ToLeader.Normalize();
 
           int NearbyCount = 1;
           Vector3 AveragePosition = Here;
           Vector3 AverageAlignment = instance[i].Forward;
+
           for ( int j = 0; j < instance.Count; j++ )
           {
+            //Find all members in radius, if they are add too average position and alignment
             Vector3 Other = instance[j].Translation;
             float Distance = Vector3.Distance(Here, Other);
             if ( Distance < 4000f )
@@ -169,6 +139,7 @@ public class Pack : MovableModel3D {
               NearbyCount += 1;
             }      
           }
+          //Check leader as well
           float DistanceLead = Vector3.Distance(Here, leader.Translation);
           if ( DistanceLead < 4000f )
           {
@@ -186,14 +157,21 @@ public class Pack : MovableModel3D {
           Vector3 FromFlock = ToFlock * -1f;
 
           Vector3 Goal;
+          //Goals
+          //ToFlock is towards AvgPosition
+          //AverageAlignment is self-evident
+          //FromFlock is away from AvgPosition
 
+          //Determine which direction to go
           float DistanceAvg = Vector3.Distance(Here, AveragePosition);
           if (NearbyCount > 2)
           {
             if (DistanceAvg < 1000f)
             {
+              //Separation
               if ( DistanceAvg > 500f)
               {
+                //Interpolate with Alignment
                 float CloseWeight = (DistanceAvg - 500f) / 500f;
                 Goal = (1f - CloseWeight) * FromFlock + (CloseWeight * AverageAlignment); 
               }
@@ -201,17 +179,22 @@ public class Pack : MovableModel3D {
             }
             if (DistanceAvg < 3000f)
             {
+              //Allignment
               if ( DistanceAvg > 2000 )
               {
+                //Interpolate with Cohesion
                 float FarWeight = (DistanceAvg - 1000f) / 1000f;
                 Goal = (1f - FarWeight) * AverageAlignment + (FarWeight * ToFlock);
               }
               else Goal = AverageAlignment;
             }
+            //Cohesion
             else Goal = ToFlock;
           }
+          //Keep going whatever direction
           else Goal = Torwards;
 
+          //Leader Position weighted directly with goal
           Goal = Goal * (1.0f - leaderWeight) + ToLeader * leaderWeight;
           Goal.Normalize();
 

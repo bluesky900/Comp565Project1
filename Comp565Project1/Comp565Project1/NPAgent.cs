@@ -133,8 +133,11 @@ namespace AGMGSKv9
     {
       float distance; //distance from goal
       float tagDistance = 200f; //minimum distance from treasure to tag it
+      //Inspector info
       inspector.setInfo(22, "NPAgent Treasures collected: " + treasureCount.ToString());
       inspector.setInfo(23, "NPAgent Treasure Hunt? " + treasurePath +", Time: " + stateTime);
+
+      //Check if any treasure is close enough to hunt
       for (int i = 0; i < this.treasureList.getTreasureNode.Length; i++)
       {
         if (Vector2.Distance(new Vector2(agentObject.Translation.X, agentObject.Translation.Z), new Vector2(this.treasureList.getTreasureNode[i].x * this.stage.Spacing, this.treasureList.getTreasureNode[i].z * this.stage.Spacing)) < 4000f && this.treasureList.getTreasureNode[i].isTagged == false)
@@ -178,12 +181,16 @@ namespace AGMGSKv9
             stateTime = 0;
           }
 
-          int turnAngle;
-          if (stateTime > 10) turnAngle = 3;
-          else turnAngle = 2;
           //Orient agent towards the treasure then get distance to treasure
-          for ( int i = 0; i< turnAngle; i++ )
-            agentObject.turnTowards(new Vector3(this.treasureList.getTreasureNode[this.treasureListNum].x * this.stage.Terrain.Spacing, 0, this.treasureList.getTreasureNode[this.treasureListNum].z * this.stage.Terrain.Spacing));
+          if (instance[0].Yaw == 0) // If sensors aren't detecting anything
+          {
+            int turnAngle;
+            //sets turning angle larger if agent is taking a while to get to goal
+            if (stateTime > 10) turnAngle = 3;
+            else turnAngle = 2;
+            for (int i = 0; i < turnAngle; i++)
+              agentObject.turnTowards(new Vector3(this.treasureList.getTreasureNode[this.treasureListNum].x * this.stage.Terrain.Spacing, 0, this.treasureList.getTreasureNode[this.treasureListNum].z * this.stage.Terrain.Spacing));
+          }
           distance = Vector2.Distance(new Vector2(agentObject.Translation.X, agentObject.Translation.Z), new Vector2(this.treasureList.getTreasureNode[this.treasureListNum].x * this.stage.Spacing, this.treasureList.getTreasureNode[this.treasureListNum].z * this.stage.Spacing));
 
           // if we are within distance from the treasure, increment count, tag treasure, and return to waypoint navigation
@@ -203,12 +210,16 @@ namespace AGMGSKv9
       }
       else
       {
-        int turnAngle;
-        if (stateTime > 10) turnAngle = 5;
-        else turnAngle = 3;
-        for (int i = 0; i < turnAngle; i++)
+        if (instance[0].Yaw == 0) // If sensors are not colliding with anything
         {
-          agentObject.turnTowards(nextGoal.Translation);
+          //sets turning angle larger if agent is taking a while to get to goal
+          int turnAngle;
+          if (stateTime > 10) turnAngle = 5;
+          else turnAngle = 3;
+          for (int i = 0; i < turnAngle; i++)
+          {
+            agentObject.turnTowards(nextGoal.Translation);
+          }
         }
         // adjust to face nextGoal every move
         // agentObject.turnTowards(nextGoal.Translation);
@@ -225,6 +236,7 @@ namespace AGMGSKv9
           stateTime = 0;
           // agentObject.turnToFace(nextGoal.Translation);
         }
+        //checks to see if any treasures are left, if so stop it
         bool keepGoing = false;
         for ( int i = 0; i < treasureList.getTreasureNode.Length; i++ )
         {
@@ -234,6 +246,7 @@ namespace AGMGSKv9
         else instance[0].StepSize = 10;
       }
 
+      //increment timer
       stateTime += (float)gameTime.ElapsedGameTime.Milliseconds/1000f;
       base.Update(gameTime);  // Agent's Update();
     }

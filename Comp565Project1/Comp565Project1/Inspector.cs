@@ -59,7 +59,7 @@ public class Inspector {
    private const int MatrixBase = 5;
    private const int FirstBase = 10;    // base to offset for display strings
    private const int SecondBase =  15;   // second pane for display strings
-    private const int ThirdBase = 20;   // third pane for display strings
+   private const int ThirdBase = 20;   // third pane for display strings
     // Screen Viewport and text fonts and display information variables
     private Viewport infoViewport;
    private SpriteFont infoFont;
@@ -192,7 +192,7 @@ public class Inspector {
             spriteBatch.DrawString(infoFont, infoString[infoBase + i], FontPos[i], fontColor); }
          }
       else if (infoCount == 2)
-      { // show miscellaneous info stings 20...25
+      { // show miscellaneous info stings 20...25; extra panel for our needs
         int infoBase = ThirdBase;
         for (int i = 0; i < InfoPaneSize; i++)
         {
